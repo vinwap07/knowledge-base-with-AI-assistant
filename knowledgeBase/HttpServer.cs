@@ -1,4 +1,5 @@
 using System.Net;
+using knowledgeBase.Middleware;
 
 namespace knowledgeBase;
 

@@ -39,7 +39,6 @@ public class ErrorHandlingMiddleware : IMiddleware
     {
         return exception switch
         {
-            FormDataParseException => (HttpStatusCode.BadRequest, "Неверный формат данных. Пожалуйста, проверьте введенные данные."),
             UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Доступ запрещен. Пожалуйста, авторизуйтесь."),
             FileNotFoundException => (HttpStatusCode.NotFound, "Странциа не найдена."),
             ArgumentException => (HttpStatusCode.BadRequest, "Неверный запрос. Проверьте введенные данные."),
