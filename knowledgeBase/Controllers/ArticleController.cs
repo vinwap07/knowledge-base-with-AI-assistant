@@ -1,3 +1,4 @@
+/*
 using System.Net;
 using knowledgeBase.Services;
 
@@ -37,3 +38,4 @@ public class ArticleController : BaseController
         }
     }
 }
+*/

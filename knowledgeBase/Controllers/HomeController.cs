@@ -1,4 +1,4 @@
-using System.Net;
+/* using System.Net;
 
 namespace knowledgeBase.Controllers;
 
@@ -20,3 +20,4 @@ public class HomeController : BaseController
         throw new NotImplementedException();
     }
 }
+*/

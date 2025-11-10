@@ -5,8 +5,7 @@ namespace knowledgeBase.Controllers;
 
 public abstract class BaseController
 {
-    public HttpListenerContext Context { get; set; }
-    public abstract Task<string> HandleRequest();
+    public abstract Task<string> HandleRequest(HttpListenerContext context);
     protected string ToJson(object data)
     {
         var options = new JsonSerializerOptions
@@ -17,9 +16,9 @@ public abstract class BaseController
         
         return JsonSerializer.Serialize(data, options);
     }
-    protected void Redirect(string url)
+    protected void Redirect(HttpListenerContext context, string url)
     {
-        Context.Response.Redirect(url);
+        context.Response.Redirect(url);
     }
     
     protected async Task<string> ReadRequestBodyAsync(HttpListenerRequest request)

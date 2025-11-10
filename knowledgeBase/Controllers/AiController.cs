@@ -1,3 +1,4 @@
+/*
 using System.Net;
 using knowledgeBase.Services;
 
@@ -20,3 +21,4 @@ public class AIController : BaseController
         }
     }
 }
+*/
