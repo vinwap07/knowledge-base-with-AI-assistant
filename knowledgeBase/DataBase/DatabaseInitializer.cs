@@ -12,16 +12,36 @@ public class DatabaseInitializer
     public async Task InitializeAsync()
     {
         await CreateTablesAsync();
-        await SeedDataAsync();
+        // await SeedDataAsync();
     }
     
     private async Task CreateTablesAsync()
     {
-        var file = File.Open("/createDB.sql", FileMode.Open);
-        var reader = new StreamReader(file);
-        string sql = reader.ReadToEnd();
+        string sqlFilePath = "public/createDataBase.sql";
+
+        if (!File.Exists(sqlFilePath))
+        {
+            throw new FileNotFoundException($"SQL файл не найден: {sqlFilePath}");
+        }
+
+        try
+        {
+            using var fileStream = File.Open(sqlFilePath, FileMode.Open);
+            using var reader = new StreamReader(fileStream);
         
-        await _connection.ExecuteNonQuery(sql);
+            string sql = await reader.ReadToEndAsync();
+        
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new InvalidOperationException("SQL файл пуст");
+            }
+
+            await _connection.ExecuteNonQuery(sql);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Ошибка при выполнении SQL скрипта: {ex.Message}", ex);
+        }
     }
     
     private async Task SeedDataAsync()

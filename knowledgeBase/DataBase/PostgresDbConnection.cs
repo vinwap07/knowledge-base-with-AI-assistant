@@ -6,71 +6,78 @@ namespace knowledgeBase.DataBase;
 public class PostgresDbConnection : IDatabaseConnection, IDisposable
 {
     private readonly string _connectionString;
-    private NpgsqlConnection _connection;
+    private bool _disposed = false;
 
     public PostgresDbConnection(string connectionString)
     {
-        _connectionString = connectionString;
+        _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
     }
 
-    public async Task OpenAsync()
+    public Task OpenAsync()
     {
-        await _connection.OpenAsync();
+        return Task.CompletedTask;
     }
 
     public void Dispose()
     {
-        _connection.Dispose();
+        _disposed = true;
     }
 
-    public async Task<IDataReader> ExecuteReader(string sql, Dictionary<string, object> parameters = null)
+    public async Task<IDataReader> ExecuteReader(string sql, Dictionary<string, object>? parameters = null)
     {
-        await EnsureConnectionOpen();
-        using var command = CreateCommand(sql, parameters);
-        return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(PostgresDbConnection));
+
+        var connection = new NpgsqlConnection(_connectionString);
+        try
+        {
+            await connection.OpenAsync();
+            var command = CreateCommand(sql, parameters, connection);
+            try
+            {
+                return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            }
+            catch
+            {
+                command.Dispose();
+                throw;
+            }
+        }
+        catch
+        {
+            await connection.DisposeAsync();
+            throw;
+        }
     }
 
-    public async Task<int> ExecuteNonQuery(string sql, Dictionary<string, object> parameters = null)
+    public async Task<int> ExecuteNonQuery(string sql, Dictionary<string, object>? parameters = null)
     {
-        await EnsureConnectionOpen();
-        using var connection = CreateConnection();
-        using var command = CreateCommand(sql, parameters, connection);
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(PostgresDbConnection));
+
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        
+        await using var command = CreateCommand(sql, parameters, connection);
         return await command.ExecuteNonQueryAsync();
     }
 
-    public async Task<object> ExecuteScalar(string sql, Dictionary<string, object> parameters = null)
+    public async Task<object?> ExecuteScalar(string sql, Dictionary<string, object>? parameters = null)
     {
-        await EnsureConnectionOpen();
-        using var connection = CreateConnection();
-        using var command = CreateCommand(sql, parameters, connection);
+        if (_disposed)
+            throw new ObjectDisposedException(nameof(PostgresDbConnection));
+
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        
+        await using var command = CreateCommand(sql, parameters, connection);
         return await command.ExecuteScalarAsync();
     }
 
-    private NpgsqlConnection CreateConnection()
+    private NpgsqlCommand CreateCommand(string sql, Dictionary<string, object>? parameters, NpgsqlConnection connection)
     {
-        var connection = new NpgsqlConnection(_connectionString);
-        connection.Open();
-        return connection;
-    }
-    
-    private async Task EnsureConnectionOpen()
-    {
-        if (_connection == null)
-        {
-            _connection = new NpgsqlConnection(_connectionString);
-        }
+        var cmd = new NpgsqlCommand(sql, connection);
         
-        if (_connection.State != ConnectionState.Open)
-        {
-            await _connection.OpenAsync();
-        }
-    }
-
-    private NpgsqlCommand CreateCommand(string sql, Dictionary<string, object> parameters, NpgsqlConnection conn = null)
-    {
-        var cmd = (conn ?? _connection).CreateCommand();
-        cmd.CommandText = sql;
-
         if (parameters != null)
         {
             foreach (var param in parameters)

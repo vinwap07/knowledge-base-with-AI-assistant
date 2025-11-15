@@ -1,39 +1,113 @@
 using System.Net;
+using System.Security.Authentication;
 using System.Text;
 using knowledgeBase.Controllers;
-using knowledgeBase.Entities;
-
 namespace knowledgeBase.Middleware;
 
 public class RoutingMiddleware : IMiddleware
 {
-    private UserController _userController;
-    //private ArticleController _articleController;
-    public RoutingMiddleware(UserController userController)
+    private readonly RouteTable _routeTable;
+
+    public RoutingMiddleware(RouteTable routes)
     {
-        _userController = userController;
+        _routeTable = routes;
+    }
+
+    public async Task InvokeAsync(HttpContext myContext, Func<Task> next)
+    {
+        var context = myContext.Context;
+        var request = context.Request;
+        var response = context.Response;
+        
+        // try
+        // {
+        //     string method = request.HttpMethod;
+        //     string path = request.Url.LocalPath;
+        //         
+        //     if (path.Contains(".well-known/appspecific/com.chrome.devtools.json"))
+        //     {
+        //         await HandleChromeDevToolsRequest(context);
+        //         return;
+        //     }
+        //     
+        //     Console.WriteLine($"'{method}': {path}");
+        //     var route = _routeTable.FindRoute(method, path);
+        //
+        //     if (route == null)
+        //     {
+        //         await next();
+        //     }
+        //     else
+        //     {
+        //         if (!route.CanUserByUnknown && myContext.Role == "unknown")
+        //         {
+        //             response.StatusCode = 401;
+        //             throw new AuthenticationException();
+        //         }
+        //         else
+        //         {
+        //             var parameters = route.ExtractParameters(path);
+        //             await route.Handler(context, parameters);
+        //         }
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     // TODO: выходят не рандомные ошибки, а ошибки типа, который пришел из метода
+        //     throw new Exception(ex.Message);
+        // }
+        string method = request.HttpMethod;
+        string path = request.Url.LocalPath;
+                
+        if (path.Contains(".well-known/appspecific/com.chrome.devtools.json"))
+        {
+            await HandleChromeDevToolsRequest(context);
+            return;
+        }
+            
+        Console.WriteLine($"'{method}': {path}");
+        var route = _routeTable.FindRoute(method, path);
+
+        if (route == null)
+        {
+            await next();
+        }
+        else
+        {
+            if (!route.CanUserByUnknown && myContext.Role == "unknown")
+            {
+                response.StatusCode = 401;
+                throw new UnauthorizedAccessException();
+            }
+            else
+            {
+                var parameters = route.ExtractParameters(path);
+                await route.Handler(context, parameters);
+            }
+        }
     }
     
-    public async Task InvokeAsync(HttpListenerContext context, Func<Task> next)
+    private async Task HandleChromeDevToolsRequest(HttpListenerContext context)
     {
-        var request = context.Request;
-        var path = request.Url.LocalPath;
-        var controllerPath = (path.Substring(1, path.Length - 1)).Substring(0, path.IndexOf('/', 1) - 1);
-
-        BaseController controller = controllerPath switch
-        {
-            /*"home" => new HomeController { Context = context },
-            "article" => new ArticleController { Context = context },
-            "llm" => new AIController { Context = context }, */
-            "user" => _userController,
-            _ => throw new FileNotFoundException()
-        };
-        
-        var result = await controller.HandleRequest(context);
-        context.Response.StatusCode = (int)HttpStatusCode.OK;
-        context.Response.ContentType = "application/json";
-        await context.Response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(result.ToString()));
+        var response = context.Response;
             
+        var devToolsResponse = new
+        {
+            supported = false,
+            message = "Chrome DevTools Protocol not supported by this server"
+        };
+            
+        string json = System.Text.Json.JsonSerializer.Serialize(devToolsResponse);
+        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(json);
+            
+        response.StatusCode = 200;
+        response.ContentType = "application/json";
+        response.ContentLength64 = buffer.Length;
+            
+        await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+        response.OutputStream.Close();
+            
+        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Chrome DevTools request handled");
     }
 }
 

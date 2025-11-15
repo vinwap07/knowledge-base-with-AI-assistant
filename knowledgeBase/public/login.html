@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - KnowBase</title>
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/auth.css"/>
+    <script defer src="js/login.js"></script>
+    <script defer src="js/script.js"></script>
+</head>
+<body>
+<header>
+    <div class="container">
+        <nav class="navbar">
+            <a href="index.html" class="logo">Know<span>Base</span></a>
+            <div class="auth-buttons">
+                <a href="index.html" class="btn btn-outline">На главную</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Вход в аккаунт</h1>
+        </div>
+
+        <form class="auth-form" id="login-form">
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div>
+                <p id="wrong-data-text"></p>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="confirm-register">Войти</button>
+        </form>
+        <div class="auth-footer">
+            <p>Нет аккаунта? <a href="register.html" class="auth-link">Зарегистрироваться</a></p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

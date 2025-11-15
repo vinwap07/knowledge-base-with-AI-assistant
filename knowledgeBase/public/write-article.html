@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Написать статью - KnowBase</title>
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/editor.css"/>
+    <script defer src="js/article-editor.js"></script>
+    <script defer src="js/header-auth-checker.js"></script>
+    <script defer src="js/script.js"></script>
+</head>
+<body>
+<header>
+    <div class="container">
+        <nav class="navbar">
+            <a href="index.html" class="logo">Know<span>Base</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Главная</a></li>
+                <li><a id="get-categories-btn">Категории</a></li>
+                <li><a id="get-articles-btn">Статьи</a></li>
+            </ul>
+            <div class="auth-buttons" id="authButtons">
+                <!-- Кнопки будут динамически обновляться -->
+                <a href="login.html" class="btn btn-outline" id="loginBtn">Войти</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">Регистрация</a>
+            </div>
+            <div class="user-menu" id="userMenu" style="display: none;">
+                <span class="username" id="userName">Пользователь</span>
+                <div class="user-avatar" id="userAvatar">?</div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="editor-container">
+    <div class="editor-header">
+        <div class="container">
+            <h1>Новая статья</h1>
+            <div class="editor-actions">
+                <button class="btn btn-primary" id="publishBtn">Опубликовать</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="editor-layout">
+            <div class="editor-main">
+                <div class="article-form">
+                    <div class="form-group">
+                        <input type="text" class="title-input" id="articleTitle" placeholder="Введите заголовок статьи...">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" class="summary-input" id="articleSummary" placeholder="Краткое описание статьи...">
+                    </div>
+
+                    <div class="form-group">
+                        <select class="category-select" id="category">
+                            <option value="">Выберите категорию</option>
+                            <option value="guides">Руководства</option>
+                            <option value="support">Техническая поддержка</option>
+                            <option value="analytics">Аналитика</option>
+                            <option value="tutorials">Обучающие материалы</option>
+                        </select>
+                    </div>
+
+                    <div class="editor-toolbar">
+                        <button type="button" class="toolbar-btn" data-command="bold" title="Жирный">B</button>
+                        <button type="button" class="toolbar-btn" data-command="italic" title="Курсив">I</button>
+                        <button type="button" class="toolbar-btn" data-command="insertUnorderedList" title="Список">•</button>
+                        <button type="button" class="toolbar-btn" data-command="insertOrderedList" title="Нумерованный список">1.</button>
+                        <button type="button" class="toolbar-btn" data-command="createLink" title="Ссылка">🔗</button>
+                        <button type="button" class="toolbar-btn" data-command="insertImage" title="Изображение">🖼️</button>
+                        <button type="button" class="toolbar-btn" data-command="code" title="Код">&lt;/&gt;</button>
+                    </div>
+
+                    <div class="editor-content" contenteditable="true" id="articleContent">
+                    </div>
+
+                    <div class="word-count">
+                        <span id="wordCountFoot">Слов: 0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-section">
+                    <h3>Статистика</h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Слов:</span>
+                            <span class="stat-value" id="wordCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Символов:</span>
+                            <span class="stat-value" id="charCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Время чтения:</span>
+                            <span class="stat-value" id="readingTime">~0 мин</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

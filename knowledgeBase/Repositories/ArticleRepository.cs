@@ -13,12 +13,12 @@ public class ArticleRepository : BaseRepository<Article, int>
         _databaseConnection = databaseConnection;
     }
     
-    public async Task<List<Article>> GetByCategoryId(int categoryId)
+    public async Task<List<Article>> GetByCategory(string category)
     {
-        var sql = @"select * from Article WHERE CategoryId = @categoryId";
+        var sql = @"select * from Article WHERE Category = @category";
         var parameters = new Dictionary<string, object>
         {
-            { "@categoryId", categoryId }
+            { "@category", category }
         };
         
         var articles = new List<Article>();
@@ -82,15 +82,17 @@ public class ArticleRepository : BaseRepository<Article, int>
 
     public async override Task<bool> Create(Article article)
     {
-        var createSql = @"insert into Article (Id, Title, Content, Author, PublishDate) 
-                values (@Id, @Title, @Content, @Author, @PublishDate);";
+        var createSql = @"insert into Article (Title, Content, Author, PublishDate, Category, Summary, ReadingTime) 
+                values (@Title, @Content, @Author, @PublishDate, @Category, @Summary, @ReadingTime);";
         var createParameters = new Dictionary<string, object>
         {
-            ["@Id"] = article.Id,
             ["@Title"] = article.Title,
             ["@Content"] = article.Content,
             ["@Author"] = article.Author,
-            ["@PublishDate"] = article.PublishDate
+            ["@PublishDate"] = article.PublishDate,  
+            ["@Category"] = article.Category,
+            ["@Summary"] = article.Summary,
+            ["@ReadingTime"] = article.ReadingTime
         };
 
         return await _databaseConnection.ExecuteNonQuery(createSql, createParameters) > 0;
@@ -99,7 +101,7 @@ public class ArticleRepository : BaseRepository<Article, int>
     public async override Task<bool> Update(Article article)
     {
         var sql = @"update Article
-                set Title = @Title, Content = @Content, Author = @Author, PublishDate = @PublishDate
+                set Title = @Title, Content = @Content, Author = @Author, PublishDate = @PublishDate, Summary = @Summary, Category = @Category
                 where Id = @Id";
         var parameters = new Dictionary<string, object>
         {
@@ -107,7 +109,9 @@ public class ArticleRepository : BaseRepository<Article, int>
             ["@Title"] = article.Title,
             ["@Content"] = article.Content,
             ["@Author"] = article.Author,
-            ["@PublishDate"] = article.PublishDate
+            ["@PublishDate"] = article.PublishDate,
+            ["@Category"] = article.Category,
+            ["@Summary"] = article.Summary
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
@@ -122,5 +126,16 @@ public class ArticleRepository : BaseRepository<Article, int>
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
+    }
+
+    public async Task<long> GetArticleLikesCountById(int articleId)
+    {
+        var sql = @"select count(*) from UserArticle where Article = @ArticleId";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@ArticleId"] = articleId
+        };
+        
+        return (long)(await _databaseConnection.ExecuteScalar(sql, parameters)); 
     }
 }

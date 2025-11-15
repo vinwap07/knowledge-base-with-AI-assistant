@@ -4,5 +4,5 @@ namespace knowledgeBase.Middleware;
 
 public interface IMiddleware
 {
-    Task InvokeAsync(HttpListenerContext context, Func<Task> next);
+    Task InvokeAsync(HttpContext context, Func<Task> next);
 }

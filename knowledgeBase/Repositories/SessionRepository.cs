@@ -46,12 +46,12 @@ public class SessionRepository : BaseRepository<Session, string>
 
     public async override Task<bool> Create(Session session)
     {
-        var createSql = @"insert into Session (SessionId, User, EndTime) 
-                values (@SessionId, @User, @EndTime);";
+        var createSql = @"insert into ""Session"" (sessionid, useremail, endtime) 
+                values (@SessionId, @UserEmail, @EndTime);";
         var createParameters = new Dictionary<string, object>
         {
             ["@SessionId"] = session.SesisonId,
-            ["@User"] = session.User,
+            ["@UserEmail"] = session.UserEmail,
             ["@EndTime"] = session.EndTime
         };
 
@@ -66,7 +66,7 @@ public class SessionRepository : BaseRepository<Session, string>
         var parameters = new Dictionary<string, object>
         {
             ["@SessionId"] = session.SesisonId,
-            ["@User"] = session.User,
+            ["@User"] = session.UserEmail,
             ["@EndTime"] = session.EndTime
         };
 
@@ -75,7 +75,7 @@ public class SessionRepository : BaseRepository<Session, string>
 
     public async override Task<bool> Delete(string sessionId)
     {
-        var sql = @"delete from Session where SessionId = @SessionId";
+        var sql = @"delete from ""Session"" where SessionId = @SessionId";
         var parameters = new Dictionary<string, object>
         {
             ["@SessionId"] = sessionId,
@@ -86,9 +86,9 @@ public class SessionRepository : BaseRepository<Session, string>
 
     public async Task<User> GetUserBySessionId(string sessionId)
     {
-        var sql = @"select user.Email, user.Password, user.Name, user.RoleId 
-                    from Sessions join User on Sessions.User = user.Email
-                    where SessionId = @SessionId";
+        var sql = @"select ""User"".email, ""User"".password, ""User"".name, ""User"".roleid 
+                    from ""Session"" join ""User"" on ""Session"".useremail = ""User"".email
+                    where sessionid = @SessionId";
         var parameters = new Dictionary<string, object>
         {
             ["@SessionId"] = sessionId

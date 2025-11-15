@@ -16,7 +16,7 @@ public class MiddlewarePipeline
         _middlewares.Add(middleware);
     }
 
-    public async Task ExecuteAsync(HttpListenerContext context)
+    public async Task ExecuteAsync(HttpContext myContext)
     {
         int index = 0;
         Func<Task> next = null;
@@ -27,7 +27,7 @@ public class MiddlewarePipeline
             {
                 var middleware = _middlewares[index++];
 
-                await middleware.InvokeAsync(context, next);
+                await middleware.InvokeAsync(myContext, next);
             }
         };
         

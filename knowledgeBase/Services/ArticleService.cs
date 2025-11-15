@@ -6,22 +6,19 @@ namespace knowledgeBase.Services;
 public class ArticleService
 {
     private ArticleRepository _articleRepository;
-    private CategoryRepository _categoryRepository;
-    private ArticleCategoryRepository _articleCategoryRepository;
     private SessionRepository _sessionRepository;
-    public async Task<bool> CreateArticle(Article article, List<string> categories, string sessionId)
-    {
-        var userRole = await _sessionRepository.GetRoleBySessionId(sessionId);
 
-        if (userRole != "admin")
-        {
-            return false;
-        }
+    public ArticleService(ArticleRepository articleRepository, SessionRepository sessionRepository)
+    {
+        _articleRepository = articleRepository;
+        _sessionRepository = sessionRepository;
+    }
+    public async Task<int> CreateArticle(Article article, string role)
+    {
         // TODO: валидация статьи
-        
         var isArticleAdded = await _articleRepository.Create(article);
         var articles = await _articleRepository.GetByTitle(article.Title);
-        int articleId = 0;
+        int articleId = -100;
         
         if (isArticleAdded)
         {
@@ -33,24 +30,24 @@ public class ArticleService
                     break;
                 }
             }
-
-            foreach (var category in categories)
-            {
-                await _articleCategoryRepository.Create(new ArticleCategory()
-                    { ArticleId = articleId, CategoryId = category });
-            }
         }
         
-        return isArticleAdded;
+        return articleId;
     }
 
-    public async Task<List<Article>> SearchArticles(int? categoryId = null)
+    public async Task<Article> GetArticleById(int articleId)
+    {
+        var article = await _articleRepository.GetById(articleId);
+        return article;
+    }
+
+    public async Task<List<Article>> SearchArticlesByCategory(string? category)
     {
         var articles = new List<Article>();
-        
-        if (categoryId.HasValue)
+        // TODO: переделать лист Article в лист ArticleViewModel 
+        if (category != null)
         {
-            articles = await _articleRepository.GetByCategoryId(categoryId.Value);
+            articles = await _articleRepository.GetByCategory(category);
         }
         else
         {
@@ -70,5 +67,11 @@ public class ArticleService
         }
         
         return isDeleted;
+    }
+
+    public async Task<long> GetArticleLikesCount(int articleId)
+    {
+        var likesCount = await _articleRepository.GetArticleLikesCountById(articleId);
+        return likesCount;
     }
 }

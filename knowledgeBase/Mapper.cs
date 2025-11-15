@@ -21,9 +21,12 @@ public static class Mapper
         {
             Id = (int)reader["Id"],
             Title = (string)reader["Title"],
+            Summary = (string)reader["Summary"],
+            Category = (string)reader["Category"],
             Content = (string)reader["Content"],
             Author = (string)reader["Author"],
             PublishDate = (DateOnly)reader["PublishDate"],
+            ReadingTime = (int)reader["ReadingTime"]
         };
     }
 
@@ -31,9 +34,9 @@ public static class Mapper
     {
         return new Session()
         {
-            SesisonId = (string)reader["SessionId"],
-            User = (string)reader["User"],
-            EndTime = (DateTime)reader["EndTime"],
+            SesisonId = (string)reader["sessionid"],
+            UserEmail = (string)reader["useremail"],
+            EndTime = (DateTime)reader["endtime"],
         };
     }
 
@@ -55,16 +58,6 @@ public static class Mapper
         {
             Name = (string)reader["Name"],
             Slug = (string)reader["Slug"]
-        };
-    }
-
-    public static ArticleCategory MapToArticleCategory(IDataReader reader)
-    {
-        return new ArticleCategory()
-        {
-            Id = (int)reader["Id"],
-            ArticleId = (int)reader["ArticleId"],
-            CategoryId = (string)reader["CategoryId"]
         };
     }
 

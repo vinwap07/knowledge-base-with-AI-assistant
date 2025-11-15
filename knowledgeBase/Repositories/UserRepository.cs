@@ -15,7 +15,7 @@ public class UserRepository: BaseRepository<User, string>
     
     public async override Task<User> GetById(string email)
     {
-        var sql = @"select * from User where Email = @Email";
+        var sql = @"select * from ""User"" where Email = @Email";
         var parameters = new Dictionary<string, object>
         {
             ["@Email"] = email
@@ -32,11 +32,11 @@ public class UserRepository: BaseRepository<User, string>
 
     public async override Task<List<User>> GetAll()
     {
-        var sql = @"select * from User";
+        var sql = @"select * from ""User""";
         var users = new List<User>();
         
         using var reader = await _databaseConnection.ExecuteReader(sql);
-        if (reader.Read())
+        while (reader.Read())
         {
             users.Add(Mapper.MapToUser(reader));
         }
@@ -46,8 +46,8 @@ public class UserRepository: BaseRepository<User, string>
 
     public async override Task<bool> Create(User user)
     {
-        var createSql = @"insert into User (Name, Email, Password, RoleId) 
-                values (@Email, @Name, @Password, @RoleId)";
+        var createSql = @"insert into ""User"" (Name, Email, Password, RoleId) 
+        values (@Name, @Email, @Password, @RoleId);";
         var createParameters = new Dictionary<string, object>
         {
             ["@Email"] = user.Email,
@@ -61,7 +61,7 @@ public class UserRepository: BaseRepository<User, string>
 
     public async override Task<bool> Update(User user)
     {
-        var sql = @"update user
+        var sql = @"update ""User""
                 set Name = @Name, Password = @Password, RoleId = @RoleId 
                 where Email = @Email";
         var parameters = new Dictionary<string, object>
@@ -77,7 +77,7 @@ public class UserRepository: BaseRepository<User, string>
 
     public async override Task<bool> Delete(string id)
     {
-        var sql = @"delete from User where Id = @Id";
+        var sql = @"delete from ""User"" where Id = @Id";
         var parameters = new Dictionary<string, object>
         {
             ["@Id"] = id
@@ -85,49 +85,28 @@ public class UserRepository: BaseRepository<User, string>
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
-    
-    public async Task<List<Article>> GetFavorileArticles(string email)
-    {
-        var sql = @"SELECT Article.*
-                    FROM UserArticle JOIN Article ON UserArticle.Article = Article.Id 
-                    WHERE UserArticle.User = @email";
-        var parameters = new Dictionary<string, object>
-        {
-            { "@email", email }
-        };
-        
-        var articles = new List<Article>();
-        
-        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
-        if (reader.Read())
-        {
-            articles.Add(Mapper.MapToArticle(reader));
-        }
-        
-        return articles;
-    }
 
-    public async Task<bool> AddArticleToFavorite(string email, int articleId)
+    public async Task<bool> AddArticleToFavorite(string userEmail, int articleId)
     {
-        var sql = @"INSERT INTO UserArticle (User, Article)
-                    VALUES (@User, @ArticleId)";
+        var sql = @"INSERT INTO UserArticle (""User"", Article)
+                    VALUES (@UserEmail, @ArticleId)";
         var parameters = new Dictionary<string, object>
         {
-            ["@User"] = email,
+            ["@UserEmail"] = userEmail,
             ["@ArticleId"] = articleId
         };
         
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
 
-    public async Task<bool> RemoveArticleFromFavorite(string email, int articleId)
+    public async Task<bool> RemoveArticleFromFavorite(string userEmail, int articleId)
     {
         var sql = @"DELETE FROM UserArticle
-                    WHERE user = @user AND article = @article;";
+                    WHERE user = @UserEmail AND article = @ArticleId;";
         var parameters = new Dictionary<string, object>
         {
-            ["@user"] = email,
-            ["@article"] = articleId
+            ["@UserEmail"] = userEmail,
+            ["@ArticleId"] = articleId
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
@@ -135,7 +114,7 @@ public class UserRepository: BaseRepository<User, string>
     
     public async Task<string> GetRoleById(int id)
     {
-        var sql = @"select * from Role where RoleId = @Id";
+        var sql = @"select * from ""Role"" where id = @Id";
         var parameters = new Dictionary<string, object>
         {
             ["@Id"] = id
@@ -150,19 +129,19 @@ public class UserRepository: BaseRepository<User, string>
         return "unknown";
     }
 
-    public async Task<List<Article>> GetAllFavoriteArticles(string email)
+    public async Task<List<Article>> GetAllFavoriteArticles(string userEmail)
     {
         var sql = @"SELECT Article.*
                     FROM Article JOIN UserArticle ON UserArticle.Article = Article.Id
-                    WHERE UserArticle.User = @email";
+                    WHERE UserArticle.""User"" = @UserEmail";
         var parameters = new Dictionary<string, object>
         {
-            ["@email"] = email
+            ["@UserEmail"] = userEmail
         };
         var articles = new List<Article>();
         
-        using var reader = await _databaseConnection.ExecuteReader(sql);
-        if (reader.Read())
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        while (reader.Read())
         {
             articles.Add(Mapper.MapToArticle(reader));
         }

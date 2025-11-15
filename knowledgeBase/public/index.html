@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KnowBase - База знаний</title>
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/home.css"/>
+    <script defer src="js/header-auth-checker.js"></script>
+    <script defer src="js/script.js"></script>
+</head>
+<body>
+<!-- Header -->
+<header>
+    <div class="container">
+        <nav class="navbar">
+            <a href="index.html" class="logo">Know<span>Base</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Главная</a></li>
+                <li><a id="get-categories-btn">Категории</a></li>
+                <li><a id="get-articles-btn">Статьи</a></li>
+            </ul>
+            <div class="auth-buttons" id="authButtons">
+                <!-- Кнопки будут динамически обновляться -->
+                <a href="login.html" class="btn btn-outline" id="loginBtn">Войти</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">Регистрация</a>
+            </div>
+            <div class="user-menu" id="userMenu" style="display: none;">
+                <span class="username" id="userName">Пользователь</span>
+                <div class="user-avatar" id="userAvatar">?</div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- Остальной контент страницы без изменений -->
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1>База знаний KnowBase</h1>
+        <p>Найдите ответы на все ваши вопросы в нашей постоянно обновляемой базе знаний</p>
+    </div>
+</section>
+
+<!-- Search Section -->
+<div class="container">
+    <section class="search-section">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Введите ваш вопрос...">
+            <button class="search-btn">Найти</button>
+        </div>
+        <div class="quick-links">
+            <a href="#" class="quick-link">Начало работы</a>
+            <a href="#" class="quick-link">Частые вопросы</a>
+            <a href="#" class="quick-link">Руководства</a>
+            <a href="#" class="quick-link">API документация</a>
+            <a href="#" class="quick-link">Обновления</a>
+        </div>
+    </section>
+</div>
+
+<!-- Categories Section -->
+<section class="categories">
+    <div class="container">
+        <h2 class="section-title">Категории знаний</h2>
+        <div class="categories-grid">
+            <div class="category-card">
+                <div class="category-icon">📚</div>
+                <h3>Руководства</h3>
+                <p>Пошаговые инструкции и руководства для начинающих и опытных пользователей</p>
+                <a href="#" class="category-link">Исследовать →</a>
+            </div>
+            <div class="category-card">
+                <div class="category-icon">🔧</div>
+                <h3>Техническая поддержка</h3>
+                <p>Решение технических проблем и ответы на вопросы по настройке</p>
+                <a href="#" class="category-link">Исследовать →</a>
+            </div>
+            <div class="category-card">
+                <div class="category-icon">📊</div>
+                <h3>Аналитика</h3>
+                <p>Статьи по аналитике, отчетам и метрикам для бизнес-решений</p>
+                <a href="#" class="category-link">Исследовать →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Articles -->
+<section class="featured">
+    <div class="container">
+        <h2 class="section-title">Популярные статьи</h2>
+        <div class="articles-grid">
+            <div class="article-card">
+                <div class="article-image">📖</div>
+                <div class="article-content">
+                    <h3>Как начать работу с платформой</h3>
+                    <p>Полное руководство для новых пользователей по настройке и началу работы</p>
+                    <a href="#" class="read-more">Читать →</a>
+                </div>
+            </div>
+            <div class="article-card">
+                <div class="article-image">⚙️</div>
+                <div class="article-content">
+                    <h3>Оптимизация производительности</h3>
+                    <p>Советы и рекомендации по улучшению скорости работы системы</p>
+                    <a href="#" class="read-more">Читать →</a>
+                </div>
+            </div>
+            <div class="article-card">
+                <div class="article-image">🔒</div>
+                <div class="article-content">
+                    <h3>Безопасность и конфиденциальность</h3>
+                    <p>Лучшие практики по обеспечению безопасности ваших данных</p>
+                    <a href="#" class="read-more">Читать →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>KnowBase</h3>
+                <p>Ваш надежный источник знаний и информации</p>
+            </div>
+            <div class="footer-section">
+                <h3>Разделы</h3>
+                <a href="index.html">Главная</a>
+                <a href="#">Категории</a>
+                <a href="#">Статьи</a>
+                <a href="write-article.html">Написать статью</a>
+            </div>
+            <div class="footer-section">
+                <h3>Поддержка</h3>
+                <a href="#">Помощь</a>
+                <a href="#">Контакты</a>
+                <a href="#">Сообщить о проблеме</a>
+            </div>
+            <div class="footer-section">
+                <h3>Сообщество</h3>
+                <a href="#">Форум</a>
+                <a href="#">Блог</a>
+                <a href="#">Социальные сети</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2024 KnowBase. Все права защищены.</p>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

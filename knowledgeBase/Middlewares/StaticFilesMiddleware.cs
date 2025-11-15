@@ -2,129 +2,106 @@ using System.Net;
 
 namespace knowledgeBase.Middleware;
 
-public class StaticFilesMiddleware : IMiddleware
+public class StaticFilesMiddleware(string root) : IMiddleware
 {
-    private readonly string _staticFilesDirectory;
-    private readonly string[] _staticFilesExtensions;
-
-    public StaticFilesMiddleware(string staticFilesDirectory = "public")
+    private readonly Dictionary<string, string> _mimeTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
-        _staticFilesDirectory = staticFilesDirectory;
-        _staticFilesExtensions = new string[] {
-            ".css", ".js", ".png", ".jpg", ".jpeg", ".gif", ".ico",
-            ".svg", ".woff", ".woff2", ".ttf", ".eot", ".json", ".xml",
-            ".txt", ".pdf", ".zip", ".mp4", ".webm", ".mp3"
-        };
-        
-        if (!Directory.Exists(_staticFilesDirectory))
-        {
-            Directory.CreateDirectory(_staticFilesDirectory);
-        }
-    }
-    public async Task InvokeAsync(HttpListenerContext context, Func<Task> next)
+        { ".html", "text/html; charset=utf-8" },
+        { ".htm", "text/html; charset=utf-8" },
+        { ".css", "text/css; charset=utf-8" },
+        { ".js", "application/javascript" },
+        { ".json", "application/json" },
+        { ".png", "image/png" },
+        { ".jpg", "image/jpeg" },
+        { ".jpeg", "image/jpeg" },
+        { ".gif", "image/gif" },
+        { ".svg", "image/svg+xml" },
+        { ".ico", "image/x-icon" },
+        { ".txt", "text/plain; charset=utf-8" },
+        { ".pdf", "application/pdf" }
+    };
+    public async Task InvokeAsync(HttpContext myContext, Func<Task> next)
     {
+        var context = myContext.Context;
         var request = context.Request;
         var response = context.Response;
 
-        if (IsStaticFileRequest(request) && TryGetStaticFilePath(request, out string filePath))
+        // try
+        // {
+        //     var localPath = request.Url?.LocalPath.TrimStart('/') ?? "";
+        //     if (string.IsNullOrEmpty(localPath) || localPath == "home")
+        //     {
+        //         localPath = "index.html";
+        //     }
+        //
+        //     var filePath = Path.Combine(root, localPath);
+        //     if (!File.Exists(filePath))
+        //     {
+        //         context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+        //         throw new FileNotFoundException();
+        //     }
+        //
+        //     var fileInfo = new FileInfo(filePath);
+        //     string extension = fileInfo.Extension.ToLowerInvariant();
+        //     if (_mimeTypes.ContainsKey(extension))
+        //     {
+        //         response.ContentType = _mimeTypes[extension];
+        //     }
+        //     else
+        //     {
+        //         response.ContentType = "application/octet-stream";
+        //     }
+        //
+        //     response.ContentLength64 = fileInfo.Length;
+        //     response.StatusCode = (int)HttpStatusCode.OK;
+        //     await SendFileAsync(response, filePath);
+        // }
+        // catch (Exception ex)
+        // {
+        //     throw new FileNotFoundException();
+        // }
+        var localPath = request.Url?.LocalPath.TrimStart('/') ?? "";
+        if (string.IsNullOrEmpty(localPath) || localPath == "home")
         {
-            if (File.Exists(filePath))
-            {
-                await ServeStaticFile(context, filePath);
-                return;
-            }
-            else
-            {
-                throw new FileNotFoundException($"Static file not found: {Path.GetFileName(filePath)}");
-            }
+            localPath = "index.html";
         }
-        
-        await next();
+
+        var filePath = Path.Combine(root, localPath);
+        if (!File.Exists(filePath))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            throw new FileNotFoundException();
+        }
+
+        var fileInfo = new FileInfo(filePath);
+        string extension = fileInfo.Extension.ToLowerInvariant();
+        if (_mimeTypes.ContainsKey(extension))
+        {
+            response.ContentType = _mimeTypes[extension];
+        }
+        else
+        {
+            response.ContentType = "application/octet-stream";
+        }
+
+        response.ContentLength64 = fileInfo.Length;
+        response.StatusCode = (int)HttpStatusCode.OK;
+        await SendFileAsync(response, filePath);
     }
 
-    public bool IsStaticFileRequest(HttpListenerRequest request)
+    private async Task SendFileAsync(HttpListenerResponse response, string filePath)
     {
-        if (request.HttpMethod != "GET")
+        const int bufferSize = 4096;
+        byte[] buffer = new byte[bufferSize];
+        using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync: true))
+        using (var output = response.OutputStream)
         {
-            return false;
-        }
-        
-        var path = request.Url.AbsolutePath;
-
-        foreach (var extension in _staticFilesExtensions)
-        {
-            if (path.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-        
-        return false;
-    }
-
-    public bool TryGetStaticFilePath(HttpListenerRequest request, out string filePath)
-    {
-        filePath = null;
-        var requestPath = request.Url.AbsolutePath;
-
-        try
-        {
-            var relativePath = requestPath.TrimStart('/');
-            filePath = Path.Combine(_staticFilesDirectory, relativePath);
-            filePath = Path.GetFullPath(filePath);
-
-            if (!filePath.StartsWith(Path.GetFullPath(_staticFilesDirectory)))
+            int bytesRead;
+            while ((bytesRead = await fileStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
-                filePath = null;
-                return false;
+                await output.WriteAsync(buffer, 0, bytesRead);
             }
-
-            return true;
-        }
-        catch
-        {
-            filePath = null;
-            return false;
         }
     }
 
-    public async Task ServeStaticFile(HttpListenerContext context, string filePath)
-    {
-        var response = context.Response;
-
-        try
-        {
-            var fileBytes = File.ReadAllBytes(filePath);
-            var contentType = Path.GetExtension(filePath).ToLowerInvariant() switch
-            {
-                ".css" => "text/css",
-                ".js" => "application/javascript",
-                ".png" => "image/png",
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".gif" => "image/gif",
-                ".ico" => "image/x-icon",
-                ".svg" => "image/svg+xml",
-                ".woff" => "font/woff",
-                ".woff2" => "font/woff2",
-                ".ttf" => "font/ttf",
-                ".html" => "text/html",
-                ".json" => "application/json",
-                ".xml" => "application/xml",
-                ".txt" => "text/plain",
-                ".pdf" => "application/pdf",
-                ".zip" => "application/zip",
-                ".mp4" => "video/mp4",
-                ".webm" => "video/webm",
-                ".mp3" => "audio/mp3",
-                _ => "application/octet-stream"
-            };
-            
-            response.ContentType = contentType;
-            response.ContentLength64 = fileBytes.Length;
-            response.StatusCode = (int)HttpStatusCode.OK;
-            response.OutputStream.Write(fileBytes, 0, fileBytes.Length);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Error serving static file: {ex.Message}");
-        }
-    }
 }

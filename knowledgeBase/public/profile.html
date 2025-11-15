@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - KnowBase</title>
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/profile.css"/>
+    <script defer src="js/profile.js"></script>
+    <script defer src="js/header-auth-checker.js"></script>
+    <script defer src="js/logout.js"></script>
+    <script defer src="js/script.js"></script>
+</head>
+<body>
+<header>
+    <div class="container">
+        <nav class="navbar">
+            <a href="index.html" class="logo">Know<span>Base</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Главная</a></li>
+                <li><a id="get-categories-btn">Категории</a></li>
+                <li><a id="get-articles-btn">Статьи</a></li>
+            </ul>
+            <div class="auth-buttons" id="authButtons">
+                <!-- Кнопки будут динамически обновляться -->
+                <a href="login.html" class="btn btn-outline" id="loginBtn">Войти</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">Регистрация</a>
+            </div>
+            <div class="user-menu" id="userMenu" style="display: none;">
+                <span class="username" id="userName">Пользователь</span>
+                <div class="user-avatar" id="userAvatar">?</div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="profile-container">
+    <div class="profile-inner">
+        <div class="container">
+            <!-- Переключатель ролей (только для разработки) -->
+            <div class="role-switcher" id="roleSwitcher">
+                <h3>Переключить роль (для тестирования):</h3>
+                <div class="role-buttons">
+                    <button class="btn btn-outline btn-sm" onclick="profileManager.switchRole('user')">👤 Пользователь</button>
+                    <button class="btn btn-outline btn-sm" onclick="profileManager.switchRole('moderator')">🛡️ Модератор</button>
+                    <button class="btn btn-outline btn-sm" onclick="profileManager.switchRole('admin')">👑 Администратор</button>
+                </div>
+            </div>
+        </div>
+    
+            <!-- Основная информация профиля -->
+            <section class="profile-header">
+                <div class="profile-avatar">
+                    <div class="avatar-placeholder" id="profileAvatar">?</div>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profileName">Загрузка...</h1>
+                    <p class="profile-email" id="profileEmail">Загрузка...</p>
+                    <div class="profile-role" id="profileRole">
+                        <span class="role-badge">Загрузка...</span>
+                    </div>
+                </div>
+                <div class="profile-actions" id="profileActions">
+                    <button class="btn btn-outline" onclick="profileManager.editProfile()">
+                        Редактировать профиль
+                    </button>
+                </div>
+                <button class="btn btn-outline" id="createModeratorBtn" onclick="profileManager.showCreateModeratorModal()">
+                    Назначить модератора
+                </button>
+                <div>
+                    <button class="btn btn-outline" id="logout">
+                        Выйти
+                    </button>
+                </div>
+            </section>
+    
+            <!-- Лайкнутые статьи (для всех ролей) -->
+            <section class="profile-section">
+                <div class="section-header">
+                    <h2>❤️ Понравившиеся статьи</h2>
+                </div>
+                <div class="articles-grid" id="likedArticles">
+                    <div class="loading-message">Загрузка понравившихся статей...</div>
+                </div>
+            </section>
+    
+            <!-- Мои статьи (для модераторов и админов) -->
+            <section class="profile-section" id="myArticlesSection">
+                <div class="section-header">
+                    <h2>📝 Мои статьи</h2>
+                    <button class="btn btn-primary" id="createArticleBtn" onclick="window.location.href='write-article.html'">
+                        ✨ Создать статью
+                    </button>
+                </div>
+                <div class="articles-grid" id="myArticles">
+                    <div class="loading-message">Загрузка ваших статей...</div>
+                </div>
+            </section>
+    
+            <!-- Модальное окно назначения модератора -->
+            <div class="modal" id="createModeratorModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🛡️ Назначить модератора</h3>
+                        <button class="modal-close" onclick="profileManager.hideCreateModeratorModal()">&times;</button>
+                    </div>
+                    <form id="createModeratorForm" onsubmit="profileManager.createModerator(event)">
+                        <div class="form-group">
+                            <label for="userEmail">Email пользователя</label>
+                            <input type="email" id="userEmail" name="email" placeholder="user@example.com" required>
+                            <div class="form-hint">Пользователь должен быть зарегистрирован в системе</div>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Назначить модератором</button>
+                    </form>
+                </div>
+            </div>
+    </div>
+</main>
+</body>
+</html>

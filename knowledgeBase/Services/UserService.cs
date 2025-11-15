@@ -9,6 +9,12 @@ public class UserService
 {
     private UserRepository _userRepository;
     private SessionRepository _sessionRepository;
+
+    public UserService(UserRepository userRepository, SessionRepository sessionRepository)
+    {
+        _userRepository = userRepository;
+        _sessionRepository = sessionRepository;
+    }
     public async Task<List<Article>> GetAllArticlesBySessionId(string sessionId)
     {
         List<Article> articles = new List<Article>();
@@ -17,13 +23,21 @@ public class UserService
         return articles;
     }
 
-    public async Task<bool> RegisterNewUser(User user)
+    public async Task<string> RegisterNewUser(User user)
     {
         // TODO: валидация данных 
-        return await _userRepository.Create(user);
+        var isExistst = (await _userRepository.GetById(user.Email)).Name != null;
+        if (!isExistst)
+        {
+            if (await _userRepository.Create(user))
+            {
+                return "OK";
+            }
+        }
+        return "Email already exists";
     }
 
-    public async Task<string> UpdateUser(User user)
+    public async Task<UserProfile> UpdateUser(User user)
     { 
         var isUpdated = await _userRepository.Update(user);
         if (!isUpdated)
@@ -33,7 +47,7 @@ public class UserService
         
         var role = await _userRepository.GetRoleById(user.RoleId);
         var userProfile = new UserProfile() { Email = user.Email, Name = user.Name, Role = role};
-        return JsonSerializer.Serialize(userProfile);
+        return userProfile;
     }
 
     public async Task<bool> DeleteUserProfile(string sessionId)
@@ -68,6 +82,14 @@ public class UserService
         return new UserProfile();
     }
 
+    public async Task<string> GetRoleBySessionId(string sessionId)
+    {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        
+        var role = await _userRepository.GetRoleById(user.RoleId);
+        return role;
+    }
+
     public async Task<UserProfile> GetUserProfileBySessionId(string id)
     {
         var user = await _sessionRepository.GetUserBySessionId(id);
@@ -84,7 +106,7 @@ public class UserService
         var sessionId = Guid.NewGuid().ToString() + "-" + DateTime.Now.Ticks;
         var endTime = DateTime.UtcNow.AddHours(1);
         
-        _sessionRepository.Create(new Session() {SesisonId = sessionId, User = clientEmail, EndTime = endTime});
+        _sessionRepository.Create(new Session() {SesisonId = sessionId, UserEmail = clientEmail, EndTime = endTime});
         return sessionId;
     }
 

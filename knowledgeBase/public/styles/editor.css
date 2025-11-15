@@ -1,0 +1,244 @@
+.editor-container {
+    padding-top: 80px;
+    min-height: 100vh;
+    background: #f7fafc;
+}
+
+.editor-header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+}
+
+.editor-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.editor-header h1 {
+    font-size: 1.8rem;
+    color: #2d3748;
+}
+
+.editor-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+    align-items: start;
+}
+
+.editor-main {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.article-form {
+    padding: 2rem;
+}
+
+.title-input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 2rem;
+    font-weight: 700;
+    border: none;
+    outline: none;
+    color: #2d3748;
+    background: transparent;
+}
+
+.title-input::placeholder {
+    color: #a0aec0;
+}
+
+.summary-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.summary-input:focus {
+    border-color: #667eea;
+}
+
+.category-select,
+.tags-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.category-select:focus,
+.tags-input:focus {
+    border-color: #667eea;
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #edf2f7;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.toolbar-btn {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.toolbar-btn:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.editor-content {
+    min-height: 400px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    outline: none;
+    line-height: 1.8;
+}
+
+.editor-content:focus {
+    border-color: #667eea;
+}
+
+.word-count {
+    text-align: right;
+    margin-top: 1rem;
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+/* Sidebar */
+.editor-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sidebar-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-section h3 {
+    margin-bottom: 1rem;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.preview-container {
+    min-height: 100px;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 12px;
+    border: 1px dashed #e2e8f0;
+    color: #718096;
+}
+
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: #718096;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.publish-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin: 0;
+}
+
+@media (max-width: 1024px) {
+    .editor-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .editor-sidebar {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .editor-header .container {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .editor-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .article-form {
+        padding: 1rem;
+    }
+
+    .title-input {
+        font-size: 1.5rem;
+    }
+}
