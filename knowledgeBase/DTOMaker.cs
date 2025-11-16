@@ -47,4 +47,19 @@ public static class DTOMaker
             Role = role
         };
     }
+
+    public static List<CategoryDTO> MapCategories(List<Category> categories)
+    {
+        var categoriesDTO = new List<CategoryDTO>();
+        foreach (var category in categories)
+        {
+            categoriesDTO.Add(new CategoryDTO()
+            {
+                Name = category.Name,
+                Slug = category.Slug
+            });
+        }
+        
+        return categoriesDTO;
+    }
 }

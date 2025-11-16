@@ -82,8 +82,12 @@ public class ArticleRepository : BaseRepository<Article, int>
 
     public async override Task<bool> Create(Article article)
     {
-        var createSql = @"insert into Article (Title, Content, Author, PublishDate, Category, Summary, ReadingTime) 
-                values (@Title, @Content, @Author, @PublishDate, @Category, @Summary, @ReadingTime);";
+        var createSql = @"BEGIN;
+        INSERT INTO Article (Title, Content, Author, PublishDate, Category, Summary, ReadingTime) 
+        VALUES (@Title, @Content, @Author, @PublishDate, @Category, @Summary, @ReadingTime);
+        UPDATE Category SET articlescount = articlescount + 1
+        WHERE slug = @Category;
+        COMMIT;";
         var createParameters = new Dictionary<string, object>
         {
             ["@Title"] = article.Title,

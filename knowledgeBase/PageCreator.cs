@@ -39,40 +39,15 @@ public static class PageCreator
     <meta charset=""UTF-8"">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>Статья - KnowBase</title>
-    <link rel=""stylesheet"" type=""text/css"" href=""scr/styles/main.css""/>
-    <link rel=""stylesheet"" type=""text/css"" href=""scr/styles/article.css""/>
-
-    <!-- Core Scripts -->
-    <script src=""config.js""></script>
-    <script src=""scr/js/core/api-service.js""></script>
-    <script src=""scr/js/core/notification-service.js""></script>
-    <script src=""scr/js/utils/helpers.js""></script>
-    <script src=""scr/js/utils/component-loader.js""></script>
-    <script src=""scr/js/core/auth-checker.js""></script>
-    <script src=""scr/js/core/app.js""></script>
+    <link rel=""stylesheet"" type=""text/css"" href=""http://localhost:5000/styles/main.css""/>
+    <link rel=""stylesheet"" type=""text/css"" href=""http://localhost:5000/styles/article.css""/>
+    <script defer src=""http://localhost:5000/js/script.js""></script>
+    <script defer src=""http://localhost:5000/js/header-auth-checker.js""></script>
+    <script defer src=""http://localhost:5000/js/load-components.js""></script>
 </head>
 <body>
-<header>
-    <div class=""container"">
-        <nav class=""navbar"">
-            <a href=""index.html"" class=""logo"">Know<span>Base</span></a>
-            <ul class=""nav-links"">
-                <li><a href=""http://localhost:5000/index.html"">Главная</a></li>
-                <li><a id=""get-categories-btn"">Категории</a></li>
-                <li><a id=""get-articles-btn"">Статьи</a></li>
-            </ul>
-            <div class=""auth-buttons"" id=""authButtons"">
-                <!-- Кнопки будут динамически обновляться -->
-                <a href=""http://localhost:5000/login.html"" class=""btn btn-outline"" id=""loginBtn"">Войти</a>
-                <a href=""http://localhost:5000/register.html"" class=""btn btn-primary"" id=""registerBtn"">Регистрация</a>
-            </div>
-            <div class=""user-menu"" id=""userMenu"" style=""display: none;"">
-                <span class=""username"" id=""userName"">Пользователь</span>
-                <div class=""user-avatar"" id=""userAvatar"">?</div>
-            </div>
-        </nav>
-    </div>
-</header>
+
+<div id=""header""></div>
 
 <div class=""article-container"">
     <div class=""article-header"">
@@ -106,10 +81,12 @@ public static class PageCreator
     </div>
 
     <div class=""article-actions"">
-        <button class=""btn btn-outline"" onclick=""history.back()"">← Назад</button>
+        <button class=""btn btn-outline"" onclick=""window.location.href='http://localhost:5000/articles.html'"">Ко всем статьям</button>
         <button class=""btn btn-primary"" id=""likeBtn"">❤️ Нравится</button>
     </div>
 </div>
+
+<div id=""footer""></div>
 </body>
 </html>";
         return page;

@@ -45,18 +45,18 @@ CREATE TABLE IF NOT EXISTS QuestionLog (
 
 -- Создание таблицы категорий
 CREATE TABLE IF NOT EXISTS Category (
+    slug VARCHAR(100) NOT NULL UNIQUE,
     "name" VARCHAR(100) NOT NULL,
     description VARCHAR(200) NOT NULL, 
     articlesCount INTEGER DEFAULT 0,
-    slug VARCHAR(100) NOT NULL,
     icon VARCHAR(15),
-    PRIMARY KEY ("name")
+    PRIMARY KEY ("slug")
 );
 
-INSERT INTO Category ("name", description, slug, icon) VALUES 
-('Руководства', 'Пошаговые инструкции и руководства для начинающих и опытных пользователей', 'guides', '📚'),
-('Техническая поддержка', 'Решение технических проблем и ответы на вопросы по настройке', 'support', '🔧')
-ON CONFLICT ("name") DO NOTHING;
+INSERT INTO Category (slug, "name", description, icon) VALUES 
+('guides', 'Руководства', 'Пошаговые инструкции и руководства для начинающих и опытных пользователей', '📚'),
+('support', 'Техническая поддержка', 'Решение технических проблем и ответы на вопросы по настройке',  '🔧')
+ON CONFLICT (slug) DO NOTHING;
 
 -- Создание таблицы статей
 CREATE TABLE IF NOT EXISTS Article (
@@ -69,7 +69,8 @@ CREATE TABLE IF NOT EXISTS Article (
     PublishDate DATE NOT NULL, 
     ReadingTime INTEGER NOT NULL,
     LikesCount INTEGER DEFAULT 0,
-    FOREIGN KEY (Author) REFERENCES "User"(Email) ON DELETE CASCADE
+    FOREIGN KEY (Author) REFERENCES "User"(Email) ON DELETE CASCADE,
+    FOREIGN KEY (Category) REFERENCES Category(slug) 
 );
 
 CREATE TABLE IF NOT EXISTS UserArticle (

@@ -121,7 +121,7 @@ class HeaderAuthChecker {
     authToken: localStorage.getItem('authToken')
 });
     
-// Инициализация когда DOM загружен
-document.addEventListener('DOMContentLoaded', function() {
-    new HeaderAuthChecker();
-});
+// // Инициализация когда DOM загружен
+// document.addEventListener('DOMContentLoaded', function() {
+//     new HeaderAuthChecker();
+// });

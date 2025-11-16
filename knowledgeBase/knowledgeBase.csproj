@@ -29,6 +29,9 @@
         <None Update="public\write-article.html">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="public\header.html">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     
     <ItemGroup>

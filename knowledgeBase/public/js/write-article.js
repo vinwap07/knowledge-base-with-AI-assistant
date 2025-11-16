@@ -12,6 +12,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const toolbarBtns = document.querySelectorAll('.toolbar-btn');
     const CategoryElement = document.getElementById('category');
 
+    // Функция загрузки категорий с сервера
+    async function loadCategories() {
+        try {
+            console.log('Загрузка категорий с сервера...');
+            const response = await fetch('http://localhost:5000/categories/slugs');
+
+            if (!response.ok) {
+                throw new Error(`Ошибка загрузки категорий: ${response.status} ${response.statusText}`);
+            }
+
+            const categories = await response.json();
+            console.log('Загруженные категории:', categories);
+
+            // Очищаем существующие опции (кроме первой "Выберите категорию")
+            while (CategoryElement.children.length > 1) {
+                CategoryElement.removeChild(CategoryElement.lastChild);
+            }
+
+            // Проверяем, что categories - массив и не пустой
+            if (!Array.isArray(categories) || categories.length === 0) {
+                console.warn('Категории не найдены или пустой массив');
+                showNotification('Категории не найдены', 'error');
+                return;
+            }
+
+            // Добавляем категории из сервера
+            categories.forEach(category => {
+                // Проверяем наличие необходимых полей
+                if (category.slug && category.name) {
+                    const option = document.createElement('option');
+                    option.value = category.slug;
+                    option.textContent = category.name;
+                    CategoryElement.appendChild(option);
+                } else {
+                    console.warn('Некорректная категория:', category);
+                }
+            });
+
+            console.log(`Успешно загружено ${categories.length} категорий`);
+
+        } catch (error) {
+            console.error('Ошибка при загрузке категорий:', error);
+            showNotification('Не удалось загрузить категории', 'error');
+        }
+    }
+
     // Функция обновления статистики
     function updateStatistics() {
         const fullText = contentDiv ? contentDiv.textContent || contentDiv.innerText : '';
@@ -54,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const title = titleInput.value.trim();
             const content = contentDiv ? contentDiv.innerHTML : '';
             const summaryValue = summary.value.trim();
+            const categoryValue = CategoryElement.value;
 
             if (!title) {
                 alert('Пожалуйста, введите заголовок статьи.');
@@ -65,6 +112,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            if (!categoryValue) {
+                alert('Пожалуйста, выберите категорию.');
+                return;
+            }
+
             const readingTime = Math.max(1, Math.ceil((content.trim().split(/\s+/).filter(word => word.length > 0).length) / 200));
 
             const articleData = {
@@ -72,8 +124,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 Summary: summaryValue,
                 Content: content,
                 ReadingTime: readingTime,
-                Category: CategoryElement.value
+                Category: categoryValue
             };
+
+            console.log('Отправка данных статьи:', articleData);
 
             try {
                 let response = await fetch('http://localhost:5000/article/create', {
@@ -83,9 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify(articleData),
                 });
-                
+
                 let text = await response.text();
-                
+
                 if (response.status === 401) {
                     showNotification('Вы не имеете права доступа', 'error');
                     setTimeout(() => {
@@ -100,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.close();
                     return;
                 }
-                
+
                 if (text === "False") {
                     console.error('Ошибка при публикации');
                     alert('Ошибка при публикации');
@@ -113,16 +167,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (err) {
                 console.error('Ошибка сети:', err);
+                showNotification('Ошибка сети при публикации', 'error');
             }
         });
     }
 
-    // Первоначальное обновление
+    // Загружаем категории при загрузке страницы
+    loadCategories();
+
+    // Первоначальное обновление статистики
     updateStatistics();
 
     console.log('Простой редактор запущен');
 });
 
+// Остальной код (showNotification и стили) остается без изменений
 function showNotification(message, type = 'info') {
     try {
         // Создаем уведомление

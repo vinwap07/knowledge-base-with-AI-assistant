@@ -50,6 +50,8 @@ routeTable.Get("/article/myArticles",
     async (context, parameters) => await articleController.GetMyArticlePreview(context, parameters));
 routeTable.Get("/categories",
     async (context, parameters) => await categoryController.GetAllCategories(context, parameters));
+routeTable.Get("/categories/slugs",
+    async (context, parameters) => await categoryController.GetAllCategoryDTO(context, parameters));
 routeTable.Get("/article/{articleId}", 
     async (context, parameters) => await articleController.GetArticlePage(context, parameters));
 routeTable.Get("/article/popular/{count}",

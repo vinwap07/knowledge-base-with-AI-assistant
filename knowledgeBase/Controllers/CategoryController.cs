@@ -1,4 +1,6 @@
 using knowledgeBase.Services;
+using knowledgeBase.View_Models;
+
 namespace knowledgeBase.Controllers;
 
 public class CategoryController : BaseController
@@ -14,5 +16,12 @@ public class CategoryController : BaseController
     {
         var categories = await _categoryService.GetAllCategories();
         await SendJsonAsync(context.Response, categories);
+    }
+
+    public async Task GetAllCategoryDTO(HttpContext context, Dictionary<string, string> parameters)
+    {
+        var categories = await _categoryService.GetAllCategories();
+        var categoryDTOs = DTOMaker.MapCategories(categories);
+        await SendJsonAsync(context.Response, categoryDTOs);
     }
 }

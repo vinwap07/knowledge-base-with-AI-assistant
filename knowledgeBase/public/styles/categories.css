@@ -10,8 +10,7 @@ body {
 
 .categories-container {
     max-width: 1200px;
-    margin-top: 8rem;
-    margin: 0 auto;
+    margin: 6rem auto 0 auto;
     padding: 2rem;
 }
 

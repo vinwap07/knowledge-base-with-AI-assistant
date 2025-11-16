@@ -6,32 +6,13 @@
     <title>Написать статью - KnowBase</title>
     <link rel="stylesheet" type="text/css" href="styles/main.css"/>
     <link rel="stylesheet" type="text/css" href="styles/editor.css"/>
-    <script defer src="js/article-editor.js"></script>
+    <script defer src="js/write-article.js"></script>
     <script defer src="js/header-auth-checker.js"></script>
     <script defer src="js/script.js"></script>
+    <script defer src="js/load-components.js"></script>
 </head>
 <body>
-<header>
-    <div class="container">
-        <nav class="navbar">
-            <a href="index.html" class="logo">Know<span>Base</span></a>
-            <ul class="nav-links">
-                <li><a href="index.html">Главная</a></li>
-                <li><a id="get-categories-btn">Категории</a></li>
-                <li><a id="get-articles-btn">Статьи</a></li>
-            </ul>
-            <div class="auth-buttons" id="authButtons">
-                <!-- Кнопки будут динамически обновляться -->
-                <a href="login.html" class="btn btn-outline" id="loginBtn">Войти</a>
-                <a href="register.html" class="btn btn-primary" id="registerBtn">Регистрация</a>
-            </div>
-            <div class="user-menu" id="userMenu" style="display: none;">
-                <span class="username" id="userName">Пользователь</span>
-                <div class="user-avatar" id="userAvatar">?</div>
-            </div>
-        </nav>
-    </div>
-</header>
+<div id="header"></div>
 
 <main class="editor-container">
     <div class="editor-header">
@@ -58,10 +39,6 @@
                     <div class="form-group">
                         <select class="category-select" id="category">
                             <option value="">Выберите категорию</option>
-                            <option value="guides">Руководства</option>
-                            <option value="support">Техническая поддержка</option>
-                            <option value="analytics">Аналитика</option>
-                            <option value="tutorials">Обучающие материалы</option>
                         </select>
                     </div>
 
@@ -104,5 +81,7 @@
         </div>
     </div>
 </main>
+
+<div id="footer"></div>
 </body>
 </html>
