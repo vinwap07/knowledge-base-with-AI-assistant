@@ -1,6 +1,6 @@
 namespace knowledgeBase.View_Models;
 
-public class UserProfile
+public class UserProfileDTO
 {
     public string Email { get; set; }
     public string Name { get; set; }

@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="styles/home.css"/>
     <script defer src="js/header-auth-checker.js"></script>
     <script defer src="js/script.js"></script>
+    <script defer src="js/index.js"></script>
 </head>
 <body>
 <!-- Header -->
@@ -17,8 +18,8 @@
             <a href="index.html" class="logo">Know<span>Base</span></a>
             <ul class="nav-links">
                 <li><a href="index.html">Главная</a></li>
-                <li><a id="get-categories-btn">Категории</a></li>
-                <li><a id="get-articles-btn">Статьи</a></li>
+                <li><a href="categories.html" id="get-categories-btn">Категории</a></li>
+                <li><a href="articles.html" id="get-articles-btn">Статьи</a></li>
             </ul>
             <div class="auth-buttons" id="authButtons">
                 <!-- Кнопки будут динамически обновляться -->
@@ -33,7 +34,6 @@
     </div>
 </header>
 
-<!-- Остальной контент страницы без изменений -->
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
@@ -87,35 +87,12 @@
 </section>
 
 <!-- Featured Articles -->
-<section class="featured">
+<section class="main-section">
     <div class="container">
         <h2 class="section-title">Популярные статьи</h2>
-        <div class="articles-grid">
-            <div class="article-card">
-                <div class="article-image">📖</div>
-                <div class="article-content">
-                    <h3>Как начать работу с платформой</h3>
-                    <p>Полное руководство для новых пользователей по настройке и началу работы</p>
-                    <a href="#" class="read-more">Читать →</a>
-                </div>
-            </div>
-            <div class="article-card">
-                <div class="article-image">⚙️</div>
-                <div class="article-content">
-                    <h3>Оптимизация производительности</h3>
-                    <p>Советы и рекомендации по улучшению скорости работы системы</p>
-                    <a href="#" class="read-more">Читать →</a>
-                </div>
-            </div>
-            <div class="article-card">
-                <div class="article-image">🔒</div>
-                <div class="article-content">
-                    <h3>Безопасность и конфиденциальность</h3>
-                    <p>Лучшие практики по обеспечению безопасности ваших данных</p>
-                    <a href="#" class="read-more">Читать →</a>
-                </div>
-            </div>
-        </div>
+    </div>
+    <div class="articles-grid" id="popularArticles">
+        <div class="loading-message">Загрузка популярных статей...</div>
     </div>
 </section>
 
@@ -146,9 +123,6 @@
                 <a href="#">Блог</a>
                 <a href="#">Социальные сети</a>
             </div>
-        </div>
-        <div class="copyright">
-            <p>&copy; 2024 KnowBase. Все права защищены.</p>
         </div>
     </div>
 </footer>

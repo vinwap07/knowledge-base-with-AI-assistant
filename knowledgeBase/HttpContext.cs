@@ -4,12 +4,14 @@ namespace knowledgeBase;
 
 public class HttpContext
 {
-    public HttpListenerContext Context { get; set; }
+    public HttpListenerResponse Response { get; set; }
+    public HttpListenerRequest Request { get; set; }
     public string Role { get; set; }
 
     public HttpContext(HttpListenerContext context, string role)
     {
-        Context = context;
+        Request = context.Request;
+        Response = context.Response;
         Role = role;
     }
 }

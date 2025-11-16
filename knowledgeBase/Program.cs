@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using knowledgeBase;
 using knowledgeBase.Middleware;
 using knowledgeBase.DataBase;
@@ -6,19 +7,23 @@ using knowledgeBase.Controllers;
 using knowledgeBase.Services;
 using knowledgeBase.Repositories;
 
-var connectionString = "Host=localhost;Username=postgres;Password=vinwap07;Database=knowledge_base";
-PostgresDbConnection dbConnection = new PostgresDbConnection(connectionString);
+var configPath = "public/config.json";
+string json = File.ReadAllText(configPath);
+Config config = JsonSerializer.Deserialize<Config>(json);
+PostgresDbConnection dbConnection = new PostgresDbConnection(config.DatabaseConnectionString);
 DatabaseInitializer dbInitializer = new DatabaseInitializer(dbConnection);
 await dbInitializer.InitializeAsync();
 
 var userRepository = new UserRepository(dbConnection);
 var sessionRepository = new SessionRepository(dbConnection);
+var categoryRepository = new CategoryRepository(dbConnection);
+var categoryService = new CategoryService(categoryRepository);
 var userService = new UserService(userRepository, sessionRepository);
 var articleRepository = new ArticleRepository(dbConnection);
-var articleService = new ArticleService(articleRepository, sessionRepository);
+var articleService = new ArticleService(articleRepository, sessionRepository, userRepository);
 var articleController = new ArticleController(articleService, userService);
 var userController = new UserController(userService, articleService);
-
+var categoryController = new CategoryController(categoryService);
 
 RouteTable routeTable = new RouteTable();
 routeTable.Get("/user/getProfile", 
@@ -31,22 +36,24 @@ routeTable.Post("/user/logout",
     async (context, parameters) => await userController.LogoutUser(context, parameters));
 routeTable.Post("/user/update", 
     async (context, parameters) => await userController.UpdateUserProfile(context, parameters));
-routeTable.Post("/user/toFavorite", 
-    async (context, parameters) => await userController.AddArticleToFavorite(context, parameters));
-routeTable.Delete("/user/toUnFavorite", 
-    async (context, parameters) => await userController.RemoveArticleFromFavorite(context, parameters));
 routeTable.Delete("user/profile", 
     async (context, parameters) => await userController.DeleteUserProfile(context, parameters));
-routeTable.Get("/user/favorite", 
-    async (context, parameters) => await userController.GetFavoriteArticlesPreview(context, parameters));
+routeTable.Post("/article/toFavorite", 
+    async (context, parameters) => await articleController.AddArticleToFavorite(context, parameters));
+routeTable.Delete("/article/toUnFavorite", 
+    async (context, parameters) => await articleController.RemoveArticleFromFavorite(context, parameters));
+routeTable.Get("/article/favorite", 
+    async (context, parameters) => await articleController.GetFavoriteArticlesPreview(context, parameters));
 routeTable.Post("/article/create",
     async (context, parameters) => await articleController.CreateArticle(context, parameters));
-routeTable.Get("article/{articleId}", 
+routeTable.Get("/article/myArticles",
+    async (context, parameters) => await articleController.GetMyArticlePreview(context, parameters));
+routeTable.Get("/categories",
+    async (context, parameters) => await categoryController.GetAllCategories(context, parameters));
+routeTable.Get("/article/{articleId}", 
     async (context, parameters) => await articleController.GetArticlePage(context, parameters));
-routeTable.Get("article/byAuthor/{author}",
-    async (context, parameters) => await articleController.GetArticlePreviewByAuthor(context, parameters));
-
-
+routeTable.Get("/article/popular/{count}",
+    async (context, parameters) => await articleController.GetPopularArticlesPreview(context, parameters), true);
 // TODO: добавить роуты для остальных контроллеров
 
 var middlewarePipeline = new MiddlewarePipeline();

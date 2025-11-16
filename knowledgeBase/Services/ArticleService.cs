@@ -1,5 +1,6 @@
 using knowledgeBase.Entities;
 using knowledgeBase.Repositories;
+using knowledgeBase.View_Models;
 
 namespace knowledgeBase.Services;
 
@@ -7,14 +8,23 @@ public class ArticleService
 {
     private ArticleRepository _articleRepository;
     private SessionRepository _sessionRepository;
+    private UserRepository _userRepository;
 
-    public ArticleService(ArticleRepository articleRepository, SessionRepository sessionRepository)
+    public ArticleService(ArticleRepository articleRepository, SessionRepository sessionRepository, UserRepository userRepository)
     {
         _articleRepository = articleRepository;
         _sessionRepository = sessionRepository;
+        _userRepository = userRepository;
     }
-    public async Task<int> CreateArticle(Article article, string role)
+    public async Task<int> CreateArticle(Article article, User user, string role)
     {
+        article.PublishDate = DateOnly.FromDateTime(DateTime.Now);
+        article.Author = user.Email;
+        if (role == "user")
+        {
+            throw new UnauthorizedAccessException();
+        }
+        
         // TODO: валидация статьи
         var isArticleAdded = await _articleRepository.Create(article);
         var articles = await _articleRepository.GetByTitle(article.Title);
@@ -37,14 +47,12 @@ public class ArticleService
 
     public async Task<Article> GetArticleById(int articleId)
     {
-        var article = await _articleRepository.GetById(articleId);
-        return article;
+        return await _articleRepository.GetById(articleId);
     }
 
     public async Task<List<Article>> SearchArticlesByCategory(string? category)
     {
         var articles = new List<Article>();
-        // TODO: переделать лист Article в лист ArticleViewModel 
         if (category != null)
         {
             articles = await _articleRepository.GetByCategory(category);
@@ -53,7 +61,7 @@ public class ArticleService
         {
             articles = await _articleRepository.GetAll();
         }
-
+        
         return articles;
     }
 
@@ -68,10 +76,31 @@ public class ArticleService
         
         return isDeleted;
     }
-
+    // TODO: переделать подсчет лайков 2 операции - добавление лайка в таблицу лайков и увеличение количества лайков как атрибут статьи
     public async Task<long> GetArticleLikesCount(int articleId)
     {
-        var likesCount = await _articleRepository.GetArticleLikesCountById(articleId);
-        return likesCount;
+        return await _articleRepository.GetArticleLikesCountById(articleId);
+    }
+
+    public async Task<List<Article>> GetArticlesByAuthor(string authorEmail)
+    {
+        return await _articleRepository.GetArticleByAuthor(authorEmail);
+    }
+
+    public async Task<List<Article>> GetPopularArticles(int count)
+    {
+        return await _articleRepository.GetArticlesByLikeCount(count);
+    }
+    
+    public async Task<bool> AddArticleToFavorite(string sessionId, int articleId)
+    {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        return await _articleRepository.AddArticleToFavorite(user.Email, articleId);
+    }
+
+    public async Task<bool> RemoveArticleFromFavorite(string sessionId, int articleId)
+    {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        return await _articleRepository.RemoveArticleFromFavorite(user.Email, articleId);
     }
 }

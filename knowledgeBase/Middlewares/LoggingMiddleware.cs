@@ -11,9 +11,8 @@ public class LoggingMiddleware : IMiddleware
         _logFilePath = logFilePath;
     }
     
-    public async Task InvokeAsync(HttpContext myContext, Func<Task> next)
+    public async Task InvokeAsync(HttpContext context, Func<Task> next)
     {
-        var context = myContext.Context;
         var startTime = DateTime.UtcNow;
         var request = context.Request;
         var response = context.Response;

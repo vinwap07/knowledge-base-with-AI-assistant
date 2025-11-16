@@ -20,46 +20,11 @@ public class StaticFilesMiddleware(string root) : IMiddleware
         { ".txt", "text/plain; charset=utf-8" },
         { ".pdf", "application/pdf" }
     };
-    public async Task InvokeAsync(HttpContext myContext, Func<Task> next)
+    public async Task InvokeAsync(HttpContext context, Func<Task> next)
     {
-        var context = myContext.Context;
         var request = context.Request;
         var response = context.Response;
 
-        // try
-        // {
-        //     var localPath = request.Url?.LocalPath.TrimStart('/') ?? "";
-        //     if (string.IsNullOrEmpty(localPath) || localPath == "home")
-        //     {
-        //         localPath = "index.html";
-        //     }
-        //
-        //     var filePath = Path.Combine(root, localPath);
-        //     if (!File.Exists(filePath))
-        //     {
-        //         context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-        //         throw new FileNotFoundException();
-        //     }
-        //
-        //     var fileInfo = new FileInfo(filePath);
-        //     string extension = fileInfo.Extension.ToLowerInvariant();
-        //     if (_mimeTypes.ContainsKey(extension))
-        //     {
-        //         response.ContentType = _mimeTypes[extension];
-        //     }
-        //     else
-        //     {
-        //         response.ContentType = "application/octet-stream";
-        //     }
-        //
-        //     response.ContentLength64 = fileInfo.Length;
-        //     response.StatusCode = (int)HttpStatusCode.OK;
-        //     await SendFileAsync(response, filePath);
-        // }
-        // catch (Exception ex)
-        // {
-        //     throw new FileNotFoundException();
-        // }
         var localPath = request.Url?.LocalPath.TrimStart('/') ?? "";
         if (string.IsNullOrEmpty(localPath) || localPath == "home")
         {

@@ -18,7 +18,7 @@ public class UserController : BaseController
 	    _articleService = articleService;
     }
     
-    public async Task UpdateUserProfile(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task UpdateUserProfile(HttpContext context, Dictionary<string, string> parameters)
     {
 	    var body = await ReadRequestBodyAsync(context.Request);
 
@@ -27,12 +27,8 @@ public class UserController : BaseController
 		    throw new ArgumentException("Request body is empty");
 	    }
 	    
-	    var cookie = context.Request.Cookies["SessoinId"];
-	    if (cookie == null)
-	    {
-		    await SendTextAsync(context.Response, "False");
-	    }
-        
+	    CookieHelper.GetCookieValue(context.Request, "SessionID");
+	    
 	    try
 	    {
 		    var user = await FromJsonBodyAsync<User>(context.Request);
@@ -41,7 +37,8 @@ public class UserController : BaseController
 			    throw new ArgumentException("Invalid request body");
 		    }
 		    
-		    var userProfile = await _userService.UpdateUser(user);
+		    await _userService.UpdateUser(user);
+		    var userProfile = DTOMaker.MapUser(user, context.Role);
 		    await SendJsonAsync(context.Response, ToJson(userProfile));
 	    }
 	    catch (JsonException ex)
@@ -50,113 +47,27 @@ public class UserController : BaseController
 	    }
     }
 
-    public async Task GetFavoriteArticlesPreview(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task LogoutUser(HttpContext context, Dictionary<string, string> parameters)
     {
-	    var cookie = context.Request.Cookies["SessionID"];
-	    if (cookie == null)
+	    var sessionID = CookieHelper.GetCookieValue(context.Request, "SessionID");
+	    var isLogout = await _userService.LogoutUser(sessionID);
+
+	    if (!isLogout)
 	    {
-		    await SendTextAsync(context.Response, "False");
-		    return;
-	    }
-	    
-	    var articles = await _userService.GetAllArticlesBySessionId(cookie.Value);
-	    var articlePreviews = new List<ArticlePreviewModel>();
-	    foreach (var article in articles)
-	    {
-		    var likesCount = await _articleService.GetArticleLikesCount(article.Id);
-		    articlePreviews.Add(new ArticlePreviewModel()
-		    {
-			    Id = article.Id,
-			    Author = article.Author,
-			    Title = article.Title,
-			    Summary = article.Summary,
-			    PublishDate = article.PublishDate,
-			    ReadingTime = article.ReadingTime,
-			    LikeCount = (int)likesCount
-		    });
-	    }
-	    
-	    if (articles.Count > 0)
-	    {
-		    await SendJsonAsync(context.Response, articlePreviews);
-	    }
-	    else
-	    {
-		    await SendTextAsync(context.Response, "False");
-	    }
-    }
-    
-    public async Task AddArticleToFavorite(HttpListenerContext context, Dictionary<string, string> parameters)
-    {
-	    var query = context.Request.QueryString;
-	    var articleId = query["articleId"];
-	    var cookie = context.Request.Cookies["SessionID"];
-	    var sessionId = cookie?.Value;
-	    if (articleId == null || sessionId == null)
-	    {
-		    await SendTextAsync(context.Response, "False");
+		    throw new FormatException("Logout failed");
 	    }
 
-	    var IsAdded = await _userService.AddArticleToFavorite(sessionId, int.Parse(articleId));
-	    await SendTextAsync(context.Response, IsAdded ? "True" : "False");
-    }
-
-    public async Task RemoveArticleFromFavorite(HttpListenerContext context, Dictionary<string, string> parameters)
-    {
-	    var query = context.Request.QueryString;
-	    var articleId = query["articleId"];
-	    var cookie = context.Request.Cookies["SessionId"];
-	    var sessionId = cookie?.Value;
-	    if (articleId == null || sessionId == null)
-	    {
-		    await SendTextAsync(context.Response, "False");
-	    }
-	    
-	    var isRemoved = await _userService.RemoveArticleFromFavorite(sessionId, int.Parse(articleId));
-	    await SendTextAsync(context.Response, isRemoved ? "True" : "False");
-    }
-
-    public async Task LogoutUser(HttpListenerContext context, Dictionary<string, string> parameters)
-    {
-	    var cookie = context.Request.Cookies["SessionId"];
-	    var nameCookie = context.Request.Cookies["Name"];
-	    if (cookie != null)
-	    {
-		    var isLogout = await _userService.LogoutUser(cookie.Value);
-
-		    if (!isLogout)
-		    {
-			    throw new FormatException("Logout failed");
-		    }
-	    
-		    cookie = new Cookie("SessionID", "")
-		    {
-			    Expires = DateTime.Now.AddDays(-1),
-			    Path = "/"
-		    };
-		    nameCookie = new Cookie("Name", "")
-		    {
-			    Expires = DateTime.Now.AddDays(-1),
-			    Path = "/"
-		    };
-		    context.Response.Cookies.Add(cookie);
-		    context.Response.Cookies.Add(nameCookie);
-	    }
+	    CookieHelper.DeleteCookie(context.Response, "SessionID");
+	    CookieHelper.DeleteCookie(context.Response, "Name");
 	    
 	    context.Response.StatusCode = (int)HttpStatusCode.OK;
 	    await SendJsonAsync(context.Response, "True");
 	    
     }
 
-    public async Task LoginUser(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task LoginUser(HttpContext context, Dictionary<string, string> parameters)
     {
 	    var body = await ReadRequestBodyAsync(context.Request);
-
-	    if (string.IsNullOrWhiteSpace(body))
-	    {
-		    throw new ArgumentException("Request body is empty");
-	    }
-        
 	    try
 	    {
 		    var options = new JsonSerializerOptions
@@ -164,15 +75,16 @@ public class UserController : BaseController
 			    PropertyNameCaseInsensitive = true
 		    };
 
-		    var user = JsonSerializer.Deserialize<User>(body, options);
-		    var userProfile = await _userService.Authenticate(user.Email, user.Password);
+		    var incomingUser = JsonSerializer.Deserialize<User>(body, options);
+		    var user = await _userService.Authenticate(incomingUser);
 
-		    if (userProfile.Email != null)
+		    if (user.Email != null)
 		    {
-			    var sessionId = await _userService.CreateSession(user.Email);
-			    SetCookie(context, sessionId, "SessionID");
-			    SetCookie(context, userProfile.Name, "Name");
-			    await SendJsonAsync(context.Response, ToJson(userProfile));
+			    var sessionId = await _userService.CreateSession(user);
+			    CookieHelper.SetCookie(context.Response, sessionId, "SessionID");
+			    CookieHelper.SetCookie(context.Response, user.Name, "Name");
+			    var userProfile = DTOMaker.MapUser(user, context.Role);
+			    await SendJsonAsync(context.Response, userProfile);
 		    }
 		    else
 		    {
@@ -185,29 +97,29 @@ public class UserController : BaseController
 	    }
     }
 
-    public async Task DeleteUserProfile(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task DeleteUserProfile(HttpContext context, Dictionary<string, string> parameters)
     {
-	    var cookie = context.Request.Cookies["SessionID"];
-	    var isDeleted = cookie != null && await _userService.DeleteUserProfile(cookie.Value);
-	    await SendTextAsync(context.Response, isDeleted ? "True" : "False");
+	    var sessionId = CookieHelper.GetCookieValue(context.Request, "SessionID");
+	    await _userService.DeleteUserProfile(sessionId);
+	    context.Response.StatusCode = (int)HttpStatusCode.OK;
     }
 
-    public async Task GetUserProfile(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task GetUserProfile(HttpContext context, Dictionary<string, string> parameters)
     {
-	    var sessionId = context.Request.Cookies["SessionID"].Value;
-	    var userProfile = await _userService.GetUserProfileBySessionId(sessionId);
-	    await SendJsonAsync(context.Response, ToJson(userProfile));
+	    var sessionId = CookieHelper.GetCookieValue(context.Request, "SessionID");
+	    var user = await _userService.GetUserBySessionId(sessionId);
+	    var userProfile = DTOMaker.MapUser(user, context.Role);
+	    await SendJsonAsync(context.Response, userProfile);
     }
 
-    public async Task RegisterNewUser(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task RegisterNewUser(HttpContext context, Dictionary<string, string> parameters)
     {
 	    var user = await FromJsonBodyAsync<User>(context.Request);
         if (user == null)
         {
             throw new ArgumentException("Request body is empty");
         }
-
-        user.RoleId = 1;
+        
         try
 	    {
 		    var result = await _userService.RegisterNewUser(user);
@@ -217,11 +129,11 @@ public class UserController : BaseController
 		    }
 		    else
 		    {
-			    var sessionId = await _userService.CreateSession(user.Email);
+			    var sessionId = await _userService.CreateSession(user);
 			    if (sessionId != null)
 			    {
-				    SetCookie(context, sessionId, "SessionID");
-				    SetCookie(context, user.Name, "Name");
+				    CookieHelper.SetCookie(context.Response, sessionId, "SessionID");
+				    CookieHelper.SetCookie(context.Response, user.Name, "Name");
 				    await SendJsonAsync(context.Response, string.Empty);
 			    }
 			    else
@@ -234,12 +146,5 @@ public class UserController : BaseController
 	    {
 		    throw new ArgumentException(ex.Message);
 	    }
-    }
-
-    private void SetCookie(HttpListenerContext context, string value, string cookieName)
-    {
-	    var expires = DateTime.Now.AddMinutes(60).ToString("R");
-	    var cookieValue = $"{cookieName}={value}; Expires={expires}; Path=/; SameSite=Strict";
-	    context.Response.Headers.Add("Set-Cookie", cookieValue);
     }
 }

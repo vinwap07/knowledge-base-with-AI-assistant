@@ -46,7 +46,7 @@ public class UserRepository: BaseRepository<User, string>
 
     public async override Task<bool> Create(User user)
     {
-        var createSql = @"insert into ""User"" (Name, Email, Password, RoleId) 
+        var createSql = @"insert into ""User"" (""name"", Email, Password, RoleId) 
         values (@Name, @Email, @Password, @RoleId);";
         var createParameters = new Dictionary<string, object>
         {
@@ -85,39 +85,32 @@ public class UserRepository: BaseRepository<User, string>
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
     }
-
-    public async Task<bool> AddArticleToFavorite(string userEmail, int articleId)
-    {
-        var sql = @"INSERT INTO UserArticle (""User"", Article)
-                    VALUES (@UserEmail, @ArticleId)";
-        var parameters = new Dictionary<string, object>
-        {
-            ["@UserEmail"] = userEmail,
-            ["@ArticleId"] = articleId
-        };
-        
-        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
-    }
-
-    public async Task<bool> RemoveArticleFromFavorite(string userEmail, int articleId)
-    {
-        var sql = @"DELETE FROM UserArticle
-                    WHERE user = @UserEmail AND article = @ArticleId;";
-        var parameters = new Dictionary<string, object>
-        {
-            ["@UserEmail"] = userEmail,
-            ["@ArticleId"] = articleId
-        };
-
-        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
-    }
     
-    public async Task<string> GetRoleById(int id)
+    public async Task<string> GetRoleByRoleId(int id)
     {
-        var sql = @"select * from ""Role"" where id = @Id";
+        var sql = @"select name from ""Role"" where id = @Id";
         var parameters = new Dictionary<string, object>
         {
             ["@Id"] = id
+        };
+        
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        if (reader.Read())
+        {
+            return (string)reader["Name"];
+        }
+        
+        return "unknown";
+    }
+
+    public async Task<string> GetRoleByEmail(string email)
+    {
+        var sql = @"SELECT ""Name"" from ""Role"" 
+                    JOIN ""User"" on ""Role"".Id = ""User"".RoleId
+                    where Email = @Email ";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@Email"] = email
         };
         
         using var reader = await _databaseConnection.ExecuteReader(sql, parameters);

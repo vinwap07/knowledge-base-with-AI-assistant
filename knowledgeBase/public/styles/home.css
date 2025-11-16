@@ -181,16 +181,6 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-.article-image {
-    height: 200px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 3rem;
-}
-
 .article-content {
     padding: 1.5rem;
 }
@@ -204,15 +194,6 @@
 .article-content p {
     color: #718096;
     margin-bottom: 1rem;
-}
-
-.read-more {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
 }
 
 /* Mobile Responsive */
@@ -232,5 +213,9 @@
 
     .search-box {
         flex-direction: column;
+    }
+
+    .articles-grid {
+        grid-template-columns: 1fr;
     }
 }

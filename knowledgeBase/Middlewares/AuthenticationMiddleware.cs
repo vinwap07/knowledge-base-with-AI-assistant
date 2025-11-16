@@ -14,9 +14,8 @@ public class AuthenticationMiddleware : IMiddleware
         _userService = userService;
         _sessionRepository = sessionRepository;
     }
-    public async Task InvokeAsync(HttpContext myContext, Func<Task> next)
+    public async Task InvokeAsync(HttpContext context, Func<Task> next)
     {
-        var context = myContext.Context;
         var cookie = context.Request.Cookies["SessionID"];
             
         if (cookie != null)
@@ -24,12 +23,20 @@ public class AuthenticationMiddleware : IMiddleware
             var sessionId = cookie.Value;
             Console.WriteLine(sessionId);
             var session = await _sessionRepository.GetById(sessionId);
-            if (session.EndTime >= DateTime.Now)
+            if (session != null)
             {
-                await _sessionRepository.Delete(sessionId);
+                if (session.EndTime <= DateTime.Now)
+                {
+                    await _sessionRepository.Delete(sessionId);
+                }
             }
             
-            myContext.Role = await _userService.GetRoleBySessionId(sessionId);
+            context.Role = await _userService.GetRoleBySessionId(sessionId);
+            if (context.Role == "unknown")
+            {
+                CookieHelper.DeleteCookie(context.Response, "SessionID");
+                CookieHelper.DeleteCookie(context.Response, "Name");
+            }
         }
         await next();
     }

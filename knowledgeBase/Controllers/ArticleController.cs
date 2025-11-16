@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Authentication;
 using knowledgeBase.Entities;
 using knowledgeBase.Services;
+using knowledgeBase.View_Models;
 
 namespace knowledgeBase.Controllers;
 
@@ -15,54 +16,23 @@ public class ArticleController : BaseController
         _articleService = articleService;
         _userService = userService;
     }
-    public async Task CreateArticle(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task CreateArticle(HttpContext context, Dictionary<string, string> parameters)
     {
-        var cookie  = context.Request.Cookies["SessionID"];
-        if (cookie == null)
-        {
-            context.Response.StatusCode = 401;
-            await WriteResponseAsync(context.Response, "unknown");
-        }
-        else
-        {
-            var article = await FromJsonBodyAsync<Article>(context.Request);
-            var user = await _userService.GetUserProfileBySessionId(cookie.Value);
-            article.PublishDate = DateOnly.FromDateTime(DateTime.Now);
-            article.Author = user.Email;
-            var role = await _userService.GetRoleBySessionId(cookie.Value);
-            if (role == null || role == "user")
-            {
-                context.Response.StatusCode = 401;
-                await WriteResponseAsync(context.Response, "unknown");
-                return;
-            }
-            
-            var articleId = await _articleService.CreateArticle(article, role);
-            if (articleId == null)
-            {
-                await SendTextAsync(context.Response, "False", 401);
-                return;
-            }
-            
-            await WriteResponseAsync(context.Response, articleId.ToString());
-        }
+        var sessionId = CookieHelper.GetCookieValue(context.Request, "sessionID");
+        var article = await FromJsonBodyAsync<Article>(context.Request);
+        var user = await _userService.GetUserBySessionId(sessionId);
+        var articleId = await _articleService.CreateArticle(article, user, context.Role);
+        await WriteResponseAsync(context.Response, articleId.ToString());
     }
 
-    public async Task GetArticlePage(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task GetArticlePage(HttpContext context, Dictionary<string, string> parameters)
     {
-        var cookie  = context.Request.Cookies["SessionID"];
-        if (cookie == null)
-        {
-            context.Response.StatusCode = 401;
-            throw new UnauthorizedAccessException();
-        }
-
+        CookieHelper.GetCookieValue(context.Request, "SessionID");
         var articleId = parameters["articleId"];
         var isNum = Int32.TryParse(articleId, out int num);
         if (articleId == null || !isNum)
         {
             throw new FileNotFoundException();
-            return;
         }
         
         var article = await _articleService.GetArticleById(num);
@@ -71,8 +41,57 @@ public class ArticleController : BaseController
         await WriteResponseAsync(context.Response, html);
     }
 
-    public async Task GetArticlePreviewByAuthor(HttpListenerContext context, Dictionary<string, string> parameters)
+    public async Task GetMyArticlePreview(HttpContext context, Dictionary<string, string> parameters)
     {
-        
+        var sessionId = CookieHelper.GetCookieValue(context.Request, "SessionID");
+        var user = await _userService.GetUserBySessionId(sessionId);
+        var articles = await _articleService.GetArticlesByAuthor(user.Email);
+        var articlePreviews = DTOMaker.MapArticles(articles);
+        await SendJsonAsync(context.Response, articlePreviews);
     }
+
+    public async Task GetPopularArticlesPreview(HttpContext context, Dictionary<string, string> parameters)
+    {
+        var articles = await _articleService.GetPopularArticles(int.Parse(parameters["count"]));
+        var articlePreviews = DTOMaker.MapArticles(articles);
+        await SendJsonAsync(context.Response, articlePreviews);
+    }
+    
+    public async Task GetFavoriteArticlesPreview(HttpContext context, Dictionary<string, string> parameters)
+    {
+        var sessionId = CookieHelper.GetCookieValue(context.Request, "SessionID");
+        var articles = await _userService.GetFavouriteArticles(sessionId);
+        var articlePreviews = DTOMaker.MapArticles(articles);
+        await SendJsonAsync(context.Response, articlePreviews);
+    }
+    
+    public async Task AddArticleToFavorite(HttpContext context, Dictionary<string, string> parameters)
+    {
+        var query = context.Request.QueryString;
+        var articleId = query["articleId"];
+        var sessionId = CookieHelper.GetCookieValue(context.Request, "SessionID");
+        if (articleId == null)
+        {
+            throw new FileNotFoundException();
+        }
+
+        var IsAdded = await _articleService.AddArticleToFavorite(sessionId, int.Parse(articleId));
+        await SendTextAsync(context.Response, IsAdded ? "True" : "False");
+    }
+    
+    public async Task RemoveArticleFromFavorite(HttpContext context, Dictionary<string, string> parameters)
+    {
+        var query = context.Request.QueryString;
+        var articleId = query["articleId"];
+        var sessionId = CookieHelper.GetCookieValue(context.Request, "SessionID");
+        if (articleId == null)
+        {
+            throw new FileNotFoundException();
+        }
+	    
+        var isRemoved = await _articleService.RemoveArticleFromFavorite(sessionId, int.Parse(articleId));
+        await SendTextAsync(context.Response, isRemoved ? "True" : "False");
+    }
+    
+    // TODO: SearchArticlesByCategory
 }

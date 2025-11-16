@@ -10,4 +10,5 @@ public class Article
     public string Category { get; set; }
     public DateOnly PublishDate { get; set; }
     public int ReadingTime { get; set; }
+    public int LikesCount { get; set; }
 }

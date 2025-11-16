@@ -1,10 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='ru'>
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>Категории статей - KnowBase</title>
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/categories.css"/>
+    <script defer src="js/script.js"></script>
+    <script defer src="js/categories.js"></script>
+    <script defer src="js/header-auth-checker.js"></script>
 </head>
 <body>
+<!-- Header -->
+<header>
+    <div class="container">
+        <nav class="navbar">
+            <a href="index.html" class="logo">Know<span>Base</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="categories.html" id="get-categories-btn">Категории</a></li>
+                <li><a href="articles.html" id="get-articles-btn">Статьи</a></li>
+            </ul>
+            <div class="auth-buttons" id="authButtons">
+                <!-- Кнопки будут динамически обновляться -->
+                <a href="login.html" class="btn btn-outline" id="loginBtn">Войти</a>
+                <a href="register.html" class="btn btn-primary" id="registerBtn">Регистрация</a>
+            </div>
+            <div class="user-menu" id="userMenu" style="display: none;">
+                <span class="username" id="userName">Пользователь</span>
+                <div class="user-avatar" id="userAvatar">?</div>
+            </div>
+        </nav>
+    </div>
+</header>
 
+<div class="categories-container">
+    <div class="categories-header">
+        <h1>Категории статей</h1>
+        <p>Исследуйте статьи по интересующим вас темам</p>
+    </div>
+
+    <div class="categories-grid" id="categoriesGrid">
+        <div class="loading-message">Загрузка категорий...</div>
+    </div>
+
+    <div class="categories-stats" id="categoriesStats" style="display: none;">
+        <div class="stat-item">
+            <span class="stat-number" id="totalCategories">0</span>
+            <span class="stat-label">Категорий</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" id="totalArticles">0</span>
+            <span class="stat-label">Статей всего</span>
+        </div>
+    </div>
+</div>
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>KnowBase</h3>
+                <p>Ваш надежный источник знаний и информации</p>
+            </div>
+            <div class="footer-section">
+                <h3>Разделы</h3>
+                <a href="index.html">Главная</a>
+                <a href="#">Категории</a>
+                <a href="#">Статьи</a>
+                <a href="write-article.html">Написать статью</a>
+            </div>
+            <div class="footer-section">
+                <h3>Поддержка</h3>
+                <a href="#">Помощь</a>
+                <a href="#">Контакты</a>
+                <a href="#">Сообщить о проблеме</a>
+            </div>
+            <div class="footer-section">
+                <h3>Сообщество</h3>
+                <a href="#">Форум</a>
+                <a href="#">Блог</a>
+                <a href="#">Социальные сети</a>
+            </div>
+        </div>
+    </div>
+</footer>
 </body>
 </html>

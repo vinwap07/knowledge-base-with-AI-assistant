@@ -1,15 +1,16 @@
 using System.Net;
+using knowledgeBase;
 
 public class Route
 {
     public string Method { get;}
     public string[] PathSegments { get;}
     public string PathTemplate { get; }
-    public Func<HttpListenerContext, Dictionary<string, string>, Task> Handler { get; }
+    public Func<HttpContext, Dictionary<string, string>, Task> Handler { get; }
     public bool CanUserByUnknown { get; }
 
     public Route(string method, string pathTemplate,
-        Func<HttpListenerContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
+        Func<HttpContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
     {
         Method = method;
         PathTemplate = pathTemplate;
@@ -80,28 +81,28 @@ public class RouteTable
     private readonly List<Route> _routes = new List<Route>();
 
     public void AddRoute(string method, string pathTemplate,
-        Func<HttpListenerContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
+        Func<HttpContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
     {
         var route = new Route(method, pathTemplate, handler, canUserByUnknown);
         _routes.Add(route);
     }
 
-    public void Get(string pathTemplate, Func<HttpListenerContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
+    public void Get(string pathTemplate, Func<HttpContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
     {
         AddRoute("GET", pathTemplate, handler, canUserByUnknown);
     }
 
-    public void Post(string pathTemplate, Func<HttpListenerContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
+    public void Post(string pathTemplate, Func<HttpContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
     {
         AddRoute("POST", pathTemplate, handler, canUserByUnknown);
     }
 
-    public void Put(string pathTemplate, Func<HttpListenerContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
+    public void Put(string pathTemplate, Func<HttpContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
     {
         AddRoute("PUT", pathTemplate, handler, canUserByUnknown);
     }
 
-    public void Delete(string pathTemplate, Func<HttpListenerContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
+    public void Delete(string pathTemplate, Func<HttpContext, Dictionary<string, string>, Task> handler, bool canUserByUnknown = false)
     {
         AddRoute("DELETE", pathTemplate, handler, canUserByUnknown);
     }

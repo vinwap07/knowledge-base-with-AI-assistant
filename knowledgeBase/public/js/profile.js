@@ -65,7 +65,6 @@ class ProfileManager {
             this.displayUserInfo();
             this.loadLikedArticles();
             this.loadMyArticles();
-            this.loadAdminStats();
 
         } catch (error) {
             console.error('Ошибка загрузки профиля:', error);
@@ -144,7 +143,7 @@ class ProfileManager {
 
     async loadLikedArticles() {
         try {
-            const response = await fetch('http://localhost:5000/user/favorite', {
+            const response = await fetch('http://localhost:5000/article/favorite', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -170,46 +169,27 @@ class ProfileManager {
 
     async loadMyArticles() {
         try {
-            let myArticles = [];
+            const response = await fetch('http://localhost:5000/article/myArticles', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            if (this.userRole === 'moderator' || this.userRole === 'admin') {
-                myArticles = [
-                    {
-                        id: 101,
-                        title: 'Новое обновление платформы v2.1',
-                        excerpt: 'В этом обновлении мы добавили новые функции и улучшили производительность системы. Основные изменения включают...',
-                        author: this.currentUser.name,
-                        date: '20.01.2024',
-                        likes: 8,
-                        status: 'published'
-                    },
-                    {
-                        id: 102,
-                        title: 'Руководство по использованию API',
-                        excerpt: 'Полное руководство по работе с нашим API для разработчиков. Примеры запросов и лучшие практики.',
-                        author: this.currentUser.name,
-                        date: '18.01.2024',
-                        likes: 15,
-                        status: 'published'
-                    }
-                ];
+            if (!response.ok) {
+                return response.text().then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                });
             }
 
+            const myArticles = await response.json();
             this.displayArticles(myArticles, 'myArticles');
-        } catch (error) {
-            console.error('Ошибка загрузки моих статей:', error);
-        }
-    }
 
-    async loadAdminStats() {
-        try {
-            if (this.userRole === 'admin') {
-                document.getElementById('totalUsers').textContent = '1,247';
-                document.getElementById('totalArticles').textContent = '543';
-                document.getElementById('totalModerators').textContent = '8';
-            }
         } catch (error) {
-            console.error('Ошибка загрузки статистики админа:', error);
+            console.error('Ошибка загрузки ваших статей:', error);
+            this.showErrorMessage('myArticles', 'Не удалось загрузить ваши статьи');
         }
     }
 
@@ -222,7 +202,7 @@ class ProfileManager {
             }
 
             if (!articles || articles.length === 0) {
-                container.innerHTML = '<div class="no-articles">Статьи не найдены</div>';
+                container.innerHTML = '<div class="no-articles">Пока тут пусто</div>';
                 return;
             }
 
@@ -236,7 +216,7 @@ class ProfileManager {
                 </div>
                 <p class="article-excerpt">${article.summary}</p>
                 <div class="article-stats">
-                    <span class="likes">❤️ ${article.likeCount}</span>
+                    <span class="likes">❤️ ${article.likesCount}</span>
                 </div>
                 <div class="article-actions">
                     <button class="btn btn-primary btn-sm" onclick="profileManager.readArticle(${article.id})">
@@ -295,7 +275,6 @@ class ProfileManager {
             this.displayUserInfo();
             this.updateUI();
             this.loadMyArticles();
-            this.loadAdminStats();
 
             this.showNotification(`Роль изменена на: ${this.getRoleDisplayName(role)}`, 'success');
         } catch (error) {
@@ -305,15 +284,6 @@ class ProfileManager {
     }
 
     // Модальные окна
-
-    hideCreateArticleModal() {
-        try {
-            document.getElementById('createArticleModal').classList.remove('active');
-            document.getElementById('createArticleForm').reset();
-        } catch (error) {
-            console.error('Ошибка закрытия модального окна:', error);
-        }
-    }
 
     showCreateModeratorModal() {
         try {

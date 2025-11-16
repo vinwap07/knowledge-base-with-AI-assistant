@@ -36,7 +36,7 @@ public class CategoryRepository : BaseRepository<Category, string>
         var questionLogs = new List<Category>();
         
         using var reader = await _databaseConnection.ExecuteReader(sql);
-        if (reader.Read())
+        while (reader.Read())
         {
             questionLogs.Add(Mapper.MapToCategory(reader));
         }
@@ -46,6 +46,7 @@ public class CategoryRepository : BaseRepository<Category, string>
 
     public async override Task<bool> Create(Category category)
     {
+        // TODO: переделать с новыми полями
         var createSql = @"insert into Category (Name, Slug) 
                 values (@Name, @Slug);";
         var createParameters = new Dictionary<string, object>
@@ -59,6 +60,7 @@ public class CategoryRepository : BaseRepository<Category, string>
 
     public async override Task<bool> Update(Category category)
     {
+        // TODO: переделать с новыми полями
         var sql = @"update Category
                 set Slug = @Slug
                 where Name = @Name";

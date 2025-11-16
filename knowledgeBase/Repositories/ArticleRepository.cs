@@ -138,4 +138,72 @@ public class ArticleRepository : BaseRepository<Article, int>
         
         return (long)(await _databaseConnection.ExecuteScalar(sql, parameters)); 
     }
+
+    public async Task<List<Article>> GetArticleByAuthor(string authorEmail)
+    {
+        var sql = @"select * from Article where Author = @Author";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@Author"] = authorEmail
+        };
+        
+        var articles = new List<Article>();
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        while (reader.Read())
+        {
+            articles.Add(Mapper.MapToArticle(reader));
+        }
+        
+        return articles;
+    }
+
+    public async Task<List<Article>> GetArticlesByLikeCount(int count)
+    {
+        var sql = @"SELECT * FROM Article 
+                    ORDER BY LikesCount DESC
+                    LIMIT @Count";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@Count"] = count
+        };
+        
+        var articles = new List<Article>();
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        while (reader.Read())
+        {
+            articles.Add(Mapper.MapToArticle(reader));
+        }
+        
+        return articles;
+    }
+    
+    public async Task<bool> AddArticleToFavorite(string userEmail, int articleId)
+    {
+        var sql = @"INSERT INTO UserArticle (""User"", Article)
+                    VALUES (@UserEmail, @ArticleId);
+                    UPDATE Article SET LikeCount = LikeCount + 1
+                    WHERE ArticleId = @ArticleId;";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@UserEmail"] = userEmail,
+            ["@ArticleId"] = articleId
+        };
+        
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
+    }
+
+    public async Task<bool> RemoveArticleFromFavorite(string userEmail, int articleId)
+    {
+        var sql = @"DELETE FROM UserArticle
+                    WHERE user = @UserEmail AND article = @ArticleId;
+                    UPDATE Article SET LikeCount = LikeCount - 1
+                    WHERE ArticleId = @ArticleId;";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@UserEmail"] = userEmail,
+            ["@ArticleId"] = articleId
+        };
+
+        return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
+    }
 }

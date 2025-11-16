@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS "User" (
 
 INSERT INTO "User" (Email, Password, name, RoleId)
 VALUES
-    ('admin@gmail.com', 'adminpassword', 'admin', 2)
+    ('admin@gmail.com', 'X3sFq3xWxxUE2K1KWANwGg==;wAKDVZBX4E4Uk2Ry9hA4OBrWwQ5q9FAijbU+Ov0HwtQ=', 'admin', 2)
 ON CONFLICT (Email) DO NOTHING;
 
 -- Создание таблицы сессий
@@ -46,9 +46,17 @@ CREATE TABLE IF NOT EXISTS QuestionLog (
 -- Создание таблицы категорий
 CREATE TABLE IF NOT EXISTS Category (
     "name" VARCHAR(100) NOT NULL,
-    Slug VARCHAR(100) NOT NULL,
+    description VARCHAR(200) NOT NULL, 
+    articlesCount INTEGER DEFAULT 0,
+    slug VARCHAR(100) NOT NULL,
+    icon VARCHAR(15),
     PRIMARY KEY ("name")
 );
+
+INSERT INTO Category ("name", description, slug, icon) VALUES 
+('Руководства', 'Пошаговые инструкции и руководства для начинающих и опытных пользователей', 'guides', '📚'),
+('Техническая поддержка', 'Решение технических проблем и ответы на вопросы по настройке', 'support', '🔧')
+ON CONFLICT ("name") DO NOTHING;
 
 -- Создание таблицы статей
 CREATE TABLE IF NOT EXISTS Article (
@@ -60,6 +68,7 @@ CREATE TABLE IF NOT EXISTS Article (
     Category VARCHAR(100) NOT NULL,
     PublishDate DATE NOT NULL, 
     ReadingTime INTEGER NOT NULL,
+    LikesCount INTEGER DEFAULT 0,
     FOREIGN KEY (Author) REFERENCES "User"(Email) ON DELETE CASCADE
 );
 
@@ -73,6 +82,7 @@ INSERT INTO UserArticle ("User", Article)
 VALUES 
     ('admin@gmail.com', 1),
     ('admin@gmail.com', 2),
-    ('admin@gmail.com', 3)
+    ('admin@gmail.com', 3),
+    ('admin@gmail.com', 4)
 ON CONFLICT ("User", Article) DO NOTHING; 
 

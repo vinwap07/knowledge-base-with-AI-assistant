@@ -13,49 +13,10 @@ public class RoutingMiddleware : IMiddleware
         _routeTable = routes;
     }
 
-    public async Task InvokeAsync(HttpContext myContext, Func<Task> next)
+    public async Task InvokeAsync(HttpContext context, Func<Task> next)
     {
-        var context = myContext.Context;
         var request = context.Request;
         var response = context.Response;
-        
-        // try
-        // {
-        //     string method = request.HttpMethod;
-        //     string path = request.Url.LocalPath;
-        //         
-        //     if (path.Contains(".well-known/appspecific/com.chrome.devtools.json"))
-        //     {
-        //         await HandleChromeDevToolsRequest(context);
-        //         return;
-        //     }
-        //     
-        //     Console.WriteLine($"'{method}': {path}");
-        //     var route = _routeTable.FindRoute(method, path);
-        //
-        //     if (route == null)
-        //     {
-        //         await next();
-        //     }
-        //     else
-        //     {
-        //         if (!route.CanUserByUnknown && myContext.Role == "unknown")
-        //         {
-        //             response.StatusCode = 401;
-        //             throw new AuthenticationException();
-        //         }
-        //         else
-        //         {
-        //             var parameters = route.ExtractParameters(path);
-        //             await route.Handler(context, parameters);
-        //         }
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     // TODO: выходят не рандомные ошибки, а ошибки типа, который пришел из метода
-        //     throw new Exception(ex.Message);
-        // }
         string method = request.HttpMethod;
         string path = request.Url.LocalPath;
                 
@@ -74,7 +35,7 @@ public class RoutingMiddleware : IMiddleware
         }
         else
         {
-            if (!route.CanUserByUnknown && myContext.Role == "unknown")
+            if (!route.CanUserByUnknown && context.Role == "unknown")
             {
                 response.StatusCode = 401;
                 throw new UnauthorizedAccessException();
@@ -87,7 +48,7 @@ public class RoutingMiddleware : IMiddleware
         }
     }
     
-    private async Task HandleChromeDevToolsRequest(HttpListenerContext context)
+    private async Task HandleChromeDevToolsRequest(HttpContext context)
     {
         var response = context.Response;
             

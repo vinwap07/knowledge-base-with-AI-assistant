@@ -11,7 +11,7 @@
         <None Update="public\**.**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Include="public\**\*">
+        <None Include="public\**\**\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="public\styles\main_style.css">

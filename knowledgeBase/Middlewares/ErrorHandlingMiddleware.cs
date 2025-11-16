@@ -6,7 +6,7 @@ namespace knowledgeBase.Middleware;
 public class ErrorHandlingMiddleware : IMiddleware
 {
     private readonly string _logErrorFilePath;
-    public async Task InvokeAsync(HttpContext myContext, Func<Task> next)
+    public async Task InvokeAsync(HttpContext context, Func<Task> next)
     {
         try
         {
@@ -14,11 +14,11 @@ public class ErrorHandlingMiddleware : IMiddleware
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(myContext.Context, ex);
+            await HandleExceptionAsync(context, ex);
         }
     }
 
-    private async Task HandleExceptionAsync(HttpListenerContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         var response = context.Response;
         var (statusCode, message) = MapExceptionToHttpResponse(exception);
@@ -47,7 +47,7 @@ public class ErrorHandlingMiddleware : IMiddleware
             _ => (HttpStatusCode.InternalServerError, "Произошла внутренняя ошибка сервера.")
         };
     }
-    private async Task LogError(HttpListenerContext context, Exception exception, HttpStatusCode statusCode)
+    private async Task LogError(HttpContext context, Exception exception, HttpStatusCode statusCode)
     {
         var request = context.Request;
         string logMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] " +

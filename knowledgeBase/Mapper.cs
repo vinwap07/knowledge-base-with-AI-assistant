@@ -26,7 +26,8 @@ public static class Mapper
             Content = (string)reader["Content"],
             Author = (string)reader["Author"],
             PublishDate = (DateOnly)reader["PublishDate"],
-            ReadingTime = (int)reader["ReadingTime"]
+            ReadingTime = (int)reader["ReadingTime"], 
+            LikesCount = (int)reader["LikesCount"],
         };
     }
 
@@ -57,7 +58,10 @@ public static class Mapper
         return new Category()
         {
             Name = (string)reader["Name"],
-            Slug = (string)reader["Slug"]
+            Slug = (string)reader["Slug"],
+            ArticlesCount = (int)reader["ArticlesCount"],
+            Icon = (string)reader["Icon"],
+            Description = (string)reader["Description"],
         };
     }
 

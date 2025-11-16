@@ -15,7 +15,7 @@ public class SessionRepository : BaseRepository<Session, string>
     
     public async override Task<Session> GetById(string sessionId)
     {
-        var sql = @"SELECT Id, Email, Password, Name, RoleId FROM Sessions WHERE Id = @Id";
+        var sql = @"SELECT SessionId, UserEmail, EndTime FROM ""Session"" WHERE SessionId = @Id";
         var parameters = new Dictionary<string, object>
         {
             ["@Id"] = sessionId
@@ -32,7 +32,7 @@ public class SessionRepository : BaseRepository<Session, string>
 
     public async override Task<List<Session>> GetAll()
     {
-        var sql = @"select * from Sessions";
+        var sql = @"select * from ""Session""";
         var sessions = new List<Session>();
         
         using var reader = await _databaseConnection.ExecuteReader(sql);
@@ -61,7 +61,7 @@ public class SessionRepository : BaseRepository<Session, string>
     public async override Task<bool> Update(Session session)
     {
         var sql = @"update Session 
-                set User = @User, EndTime = @EndTime 
+                set ""User"" = @User, EndTime = @EndTime 
                 where SessionId = @SessionId";
         var parameters = new Dictionary<string, object>
         {
@@ -86,7 +86,7 @@ public class SessionRepository : BaseRepository<Session, string>
 
     public async Task<User> GetUserBySessionId(string sessionId)
     {
-        var sql = @"select ""User"".email, ""User"".password, ""User"".name, ""User"".roleid 
+        var sql = @"select ""User"".email, ""User"".password, ""User"".""name"", ""User"".roleid 
                     from ""Session"" join ""User"" on ""Session"".useremail = ""User"".email
                     where sessionid = @SessionId";
         var parameters = new Dictionary<string, object>
@@ -105,8 +105,8 @@ public class SessionRepository : BaseRepository<Session, string>
     public async Task<string> GetRoleBySessionId(string sessionId)
     {
         var sql = @"SELECT Role.Name 
-                    FROM Sessions JOIN User ON Sessions.User = user.Email
-                    JOIN Role ON Role.RoleId = user.RoleId
+                    FROM ""Session"" JOIN ""User"" ON Sessions.""User"" = ""User"".Email
+                    JOIN Role ON Role.RoleId = ""User"".RoleId
                     WHERE SessionId = @SessionId";
         var parameters = new Dictionary<string, object>
         {

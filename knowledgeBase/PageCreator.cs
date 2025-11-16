@@ -18,7 +18,6 @@ public static class PageCreator
             <meta name='viewport' content='width=device-width, initial-scale=1'>
             <title>Ошибка {statusCodeNumber} - {statusCodeText}</title>
             <link rel=""stylesheet"" type=""text/css"" href=""http://localhost:5000/styles/error.css""/>
-            <script defer src=""http://localhost:5000/js/main.js""></script>
         </head>
             <body>
                 <div class='error-container'>
@@ -40,10 +39,17 @@ public static class PageCreator
     <meta charset=""UTF-8"">
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>Статья - KnowBase</title>
-    <link rel=""stylesheet"" type=""text/css"" href=""http://localhost:5000/styles/main.css""/>
-    <link rel=""stylesheet"" type=""text/css"" href=""http://localhost:5000/styles/article.css""/>
-    <script defer src=""http://localhost:5000/js/header-auth-checker.js""></script>
-    <script defer src=""http://localhost:5000/js/script.js""></script>
+    <link rel=""stylesheet"" type=""text/css"" href=""scr/styles/main.css""/>
+    <link rel=""stylesheet"" type=""text/css"" href=""scr/styles/article.css""/>
+
+    <!-- Core Scripts -->
+    <script src=""config.js""></script>
+    <script src=""scr/js/core/api-service.js""></script>
+    <script src=""scr/js/core/notification-service.js""></script>
+    <script src=""scr/js/utils/helpers.js""></script>
+    <script src=""scr/js/utils/component-loader.js""></script>
+    <script src=""scr/js/core/auth-checker.js""></script>
+    <script src=""scr/js/core/app.js""></script>
 </head>
 <body>
 <header>
