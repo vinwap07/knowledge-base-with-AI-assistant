@@ -1,230 +1,346 @@
-/* Стили для страницы статьи */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f7fafc;
-    color: #2d3748;
-    line-height: 1.6;
-}
-
+/* Стили для контейнера статьи */
 .article-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: white;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-top: 4rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 4rem;
     border-radius: 12px;
-    margin-top: 8rem;
-    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
 }
 
-.article-header {
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.article-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 1.5rem;
-    line-height: 1.3;
-}
-
-.article-meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.meta-label {
-    font-size: 0.9rem;
-    color: #718096;
-    font-weight: 500;
-}
-
-.meta-value {
-    font-size: 1rem;
-    color: #2d3748;
-    font-weight: 600;
-}
-
-.article-summary {
-    background: #f7fafc;
-    padding: 1.5rem;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-    font-size: 1.1rem;
-    color: #4a5568;
-    margin-bottom: 2rem;
-    font-style: italic;
-}
-
-.article-content {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #2d3748;
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .article-content h2 {
-    color: #2d3748;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+    background-color: #667eea;
+    padding: 1.5rem 2rem;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    color: #ffffff;
     font-size: 1.5rem;
+    text-align: center;
 }
 
-.article-content h3 {
-    color: #4a5568;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-size: 1.25rem;
+.modal-content h2 {
+    padding: 1.5rem 2rem;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    color: #ffffff;
+    font-size: 1.5rem;
+    text-align: center;
 }
 
-.article-content p {
+.modal-body {
+    padding: 2rem;
+}
+
+.article-info {
     margin-bottom: 1.5rem;
 }
 
-.article-content ul, .article-content ol {
+.article-category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #e6fffa;
+    color: #234e52;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.article-summary {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.6;
     margin-bottom: 1.5rem;
-    padding-left: 2rem;
 }
 
-.article-content li {
-    margin-bottom: 0.5rem;
-}
-
-.article-content blockquote {
-    border-left: 4px solid #667eea;
-    padding-left: 1.5rem;
-    margin: 1.5rem 0;
+#article-meta {
+    padding: 1rem;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    align-items: center;
     color: #4a5568;
-    font-style: italic;
 }
 
-.article-content code {
-    background: #edf2f7;
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
+#concrete-article-author {
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
 }
 
-.article-content pre {
-    background: #2d3748;
-    color: #e2e8f0;
-    padding: 1.5rem;
-    border-radius: 8px;
-    overflow-x: auto;
-    margin: 1.5rem 0;
+#concrete-article-author::before {
+    content: '👤';
 }
 
-.article-content pre code {
-    background: none;
-    padding: 0;
-    color: inherit;
+#concrete-article-stat {
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 1rem;
+}
+
+.showSummaryBtn {
+    background-color: rgba(28, 179, 197, 0.72);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.showSummaryBtn:hover {
+    background-color: rgba(16, 166, 184, 0.72);;
+}
+
+.article-content {
+    margin-bottom: 1.5rem;
 }
 
 .article-actions {
     display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid #e2e8f0;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
+.read-more {
     display: inline-flex;
     align-items: center;
+    margin-top: 1rem;
     gap: 0.5rem;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
     transition: all 0.3s ease;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-}
-
-.btn-primary:hover {
+.read-more:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
-
-.btn-outline {
-    background: transparent;
-    color: #667eea;
-    border: 2px solid #667eea;
-}
-
-.btn-outline:hover {
-    background: #667eea;
-    color: white;
-}
-
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
     .article-container {
+        margin-top: 4rem;
+        padding: 0 15px;
+    }
+
+    .modal-body {
         padding: 1.5rem;
-        margin: 1rem;
-        margin-top: 1rem;
+    }
+}
+
+/* Основное модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10002;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.ai-summary-modal {
+    background: linear-gradient(135deg, #f0fdff 0%, #e6f7fb 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 150, 200, 0.2);
+    border: 1px solid rgba(102, 217, 232, 0.3);
+    max-width: 600px;
+    margin: 40px auto;
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Заголовок модалки */
+.modal-header {
+    background: linear-gradient(135deg, #66d9e8 0%, #3bc9db 100%);
+    padding: 25px 30px;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.ai-icon {
+    font-size: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.modal-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Тело модалки */
+.modal-body {
+    padding: 30px;
+}
+
+.ai-summary-content {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    border-left: 4px solid #3bc9db;
+    box-shadow: 0 4px 20px rgba(59, 201, 219, 0.1);
+    line-height: 1.6;
+    color: #2b6a7a;
+    font-size: 15px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.ai-summary-content::before {
+    content: """;
+    position: absolute;
+    top: 15px;
+    left: -10px;
+    font-size: 40px;
+    color: #3bc9db;
+    opacity: 0.1;
+    font-family: serif;
+}
+
+.ai-disclaimer {
+    background: rgba(59, 201, 219, 0.08);
+    border: 1px solid rgba(59, 201, 219, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 13px;
+    color: #4a7a85;
+}
+
+.ai-disclaimer p {
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.ai-disclaimer::before {
+    font-size: 16px;
+}
+
+/* Футер модалки */
+.modal-footer {
+    padding: 20px 30px;
+    background: rgba(230, 247, 251, 0.8);
+    border-radius: 0 0 20px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(102, 217, 232, 0.2);
+}
+
+.btn-secondary{
+    background: white;
+    color: #1394a5;
+    border: 1px solid #3bc9db;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #f8fdff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 201, 219, 0.2);
+}
+
+
+/* Кнопка закрытия */
+.close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    color: white;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .ai-summary-modal {
+        margin: 20px;
+        max-width: calc(100% - 40px);
     }
 
-    .article-title {
-        font-size: 2rem;
+    .modal-header {
+        padding: 20px;
+        flex-wrap: wrap;
     }
 
-    .article-meta {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
+    .modal-body {
+        padding: 20px;
     }
 
-    .article-actions {
+    .modal-footer {
+        padding: 15px 20px;
         flex-direction: column;
-        align-items: center;
     }
 
-    .btn {
+    .btn-secondary,
+    .btn-primary {
         width: 100%;
-        max-width: 250px;
         justify-content: center;
     }
 }
 
-@media (max-width: 480px) {
-    .article-container {
-        padding: 1rem;
-    }
+/* Эффект при копировании */
+.summary-copied {
+    animation: copyPulse 0.6s ease;
+}
 
-    .article-title {
-        font-size: 1.75rem;
-    }
-
-    .article-summary {
-        padding: 1rem;
-        font-size: 1rem;
-    }
-
-    .article-content {
-        font-size: 1rem;
-    }
+@keyframes copyPulse {
+    0% { background: white; }
+    50% { background: rgba(59, 201, 219, 0.1); }
+    100% { background: white; }
 }

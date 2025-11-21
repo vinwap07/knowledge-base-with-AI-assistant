@@ -60,7 +60,7 @@
     color: #a0aec0;
 }
 
-.summary-input {
+.description-input {
     width: 100%;
     padding: 1rem;
     border: 2px solid #e2e8f0;
@@ -72,7 +72,7 @@
     transition: border-color 0.3s ease;
 }
 
-.summary-input:focus {
+.description-input:focus {
     border-color: #667eea;
 }
 

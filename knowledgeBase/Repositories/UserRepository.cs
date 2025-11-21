@@ -121,24 +121,4 @@ public class UserRepository: BaseRepository<User, string>
         
         return "unknown";
     }
-
-    public async Task<List<Article>> GetAllFavoriteArticles(string userEmail)
-    {
-        var sql = @"SELECT Article.*
-                    FROM Article JOIN UserArticle ON UserArticle.Article = Article.Id
-                    WHERE UserArticle.""User"" = @UserEmail";
-        var parameters = new Dictionary<string, object>
-        {
-            ["@UserEmail"] = userEmail
-        };
-        var articles = new List<Article>();
-        
-        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
-        while (reader.Read())
-        {
-            articles.Add(Mapper.MapToArticle(reader));
-        }
-        
-        return articles;
-    }
 }

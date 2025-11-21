@@ -12,10 +12,25 @@ public class ArticleRepository : BaseRepository<Article, int>
     {
         _databaseConnection = databaseConnection;
     }
+
+    public async Task<bool> CheckLikeFromUser(string userEmail, int articleId)
+    {
+        var sql = @"SELECT COUNT(*) from UserArticle 
+                    WHERE ""User"" = @UserEmail and Article = @ArticleId;";
+        var parameters = new Dictionary<string, object>
+        {
+            { "@UserEmail", userEmail },
+            { "ArticleId", articleId }
+        };
+        var count = (long) await _databaseConnection.ExecuteScalar(sql, parameters);
+        return count > 0;
+    }
     
     public async Task<List<Article>> GetByCategory(string category)
     {
-        var sql = @"select * from Article WHERE Category = @category";
+        var sql = @"select article.*, category.""name"" as categoryName, category.icon as icon 
+        from Article JOIN category ON category.slug = article.category 
+        WHERE Article.Category = @category";
         var parameters = new Dictionary<string, object>
         {
             { "@category", category }
@@ -34,7 +49,9 @@ public class ArticleRepository : BaseRepository<Article, int>
     
     public async override Task<Article> GetById(int id)
     {
-        var sql = @"select * from Article where Id = @Id";
+        var sql = @"select article.*, category.""name"" as categoryName, category.icon as icon
+        from Article JOIN category ON category.slug = article.category 
+        where Id = @Id";
         var parameters = new Dictionary<string, object>
         {
             ["@Id"] = id
@@ -51,7 +68,9 @@ public class ArticleRepository : BaseRepository<Article, int>
 
     public async Task<List<Article>> GetByTitle(string title)
     {
-        var sql = @"select * from Article where Title = @title";
+        var sql = @"select article.*, category.""name"" as categoryName, category.icon as icon 
+        from Article JOIN category ON category.slug = article.category 
+        where Title = @title";
         var parameters = new Dictionary<string, object>
         {
             ["@title"] = title
@@ -68,11 +87,12 @@ public class ArticleRepository : BaseRepository<Article, int>
 
     public async override Task<List<Article>> GetAll()
     {
-        var sql = @"select * from Article";
+        var sql = @"select article.*, category.""name"" as categoryName, category.icon as icon 
+        from Article JOIN category ON category.slug = article.category";
         var articles = new List<Article>();
         
         using var reader = await _databaseConnection.ExecuteReader(sql);
-        if (reader.Read())
+        while (reader.Read())
         {
             articles.Add(Mapper.MapToArticle(reader));
         }
@@ -83,8 +103,8 @@ public class ArticleRepository : BaseRepository<Article, int>
     public async override Task<bool> Create(Article article)
     {
         var createSql = @"BEGIN;
-        INSERT INTO Article (Title, Content, Author, PublishDate, Category, Summary, ReadingTime) 
-        VALUES (@Title, @Content, @Author, @PublishDate, @Category, @Summary, @ReadingTime);
+        INSERT INTO Article (Title, Content, Author, PublishDate, Category, Summary, ReadingTime, Description) 
+        VALUES (@Title, @Content, @Author, @PublishDate, @Category, @Summary, @ReadingTime, @Description);
         UPDATE Category SET articlescount = articlescount + 1
         WHERE slug = @Category;
         COMMIT;";
@@ -96,7 +116,8 @@ public class ArticleRepository : BaseRepository<Article, int>
             ["@PublishDate"] = article.PublishDate,  
             ["@Category"] = article.Category,
             ["@Summary"] = article.Summary,
-            ["@ReadingTime"] = article.ReadingTime
+            ["@ReadingTime"] = article.ReadingTime, 
+            ["@Description"] = article.Description
         };
 
         return await _databaseConnection.ExecuteNonQuery(createSql, createParameters) > 0;
@@ -145,7 +166,9 @@ public class ArticleRepository : BaseRepository<Article, int>
 
     public async Task<List<Article>> GetArticleByAuthor(string authorEmail)
     {
-        var sql = @"select * from Article where Author = @Author";
+        var sql = @"select article.*, category.""name"" as categoryName, category.icon as icon
+        from Article JOIN category ON category.slug = article.category
+        where Author = @Author";
         var parameters = new Dictionary<string, object>
         {
             ["@Author"] = authorEmail
@@ -163,7 +186,8 @@ public class ArticleRepository : BaseRepository<Article, int>
 
     public async Task<List<Article>> GetArticlesByLikeCount(int count)
     {
-        var sql = @"SELECT * FROM Article 
+        var sql = @"SELECT article.*, category.""name"" as categoryName, category.icon as icon 
+        from Article JOIN category ON category.slug = article.category
                     ORDER BY LikesCount DESC
                     LIMIT @Count";
         var parameters = new Dictionary<string, object>
@@ -181,12 +205,14 @@ public class ArticleRepository : BaseRepository<Article, int>
         return articles;
     }
     
-    public async Task<bool> AddArticleToFavorite(string userEmail, int articleId)
+    public async Task<bool> LikeArticle(string userEmail, int articleId)
     {
-        var sql = @"INSERT INTO UserArticle (""User"", Article)
+        var sql = @"BEGIN;
+                    INSERT INTO UserArticle (""User"", Article)
                     VALUES (@UserEmail, @ArticleId);
-                    UPDATE Article SET LikeCount = LikeCount + 1
-                    WHERE ArticleId = @ArticleId;";
+                    UPDATE Article SET LikesCount = LikesCount + 1
+                    WHERE Article.id = @ArticleId;
+                    COMMIT;";
         var parameters = new Dictionary<string, object>
         {
             ["@UserEmail"] = userEmail,
@@ -198,10 +224,12 @@ public class ArticleRepository : BaseRepository<Article, int>
 
     public async Task<bool> RemoveArticleFromFavorite(string userEmail, int articleId)
     {
-        var sql = @"DELETE FROM UserArticle
-                    WHERE user = @UserEmail AND article = @ArticleId;
-                    UPDATE Article SET LikeCount = LikeCount - 1
-                    WHERE ArticleId = @ArticleId;";
+        var sql = @"BEGIN;
+                    DELETE FROM UserArticle
+                    WHERE ""User"" = @UserEmail AND article = @ArticleId;
+                    UPDATE Article SET LikesCount = LikesCount - 1
+                    WHERE Article.id = @ArticleId;
+                    COMMIT;";
         var parameters = new Dictionary<string, object>
         {
             ["@UserEmail"] = userEmail,
@@ -209,5 +237,26 @@ public class ArticleRepository : BaseRepository<Article, int>
         };
 
         return await _databaseConnection.ExecuteNonQuery(sql, parameters) > 0;
+    }
+    
+    public async Task<List<Article>> GetAllFavoriteArticles(string userEmail)
+    {
+        var sql = @"SELECT Article.*, Category.""name"" as categoryName, category.icon as icon
+                    from Article JOIN Category ON Category.slug = Article.category
+                    JOIN UserArticle ON UserArticle.Article = Article.Id
+                    WHERE UserArticle.""User"" = @UserEmail;";
+        var parameters = new Dictionary<string, object>
+        {
+            ["@UserEmail"] = userEmail
+        };
+        var articles = new List<Article>();
+        
+        using var reader = await _databaseConnection.ExecuteReader(sql, parameters);
+        while (reader.Read())
+        {
+            articles.Add(Mapper.MapToArticle(reader));
+        }
+        
+        return articles;
     }
 }

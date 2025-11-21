@@ -34,15 +34,6 @@ CREATE TABLE IF NOT EXISTS "Session" (
     FOREIGN KEY (UserEmail) REFERENCES "User"(Email) ON DELETE CASCADE
 );
 
--- Создание таблицы логов вопросов
-CREATE TABLE IF NOT EXISTS QuestionLog (
-    Id SERIAL PRIMARY KEY,
-    Question TEXT NOT NULL,
-    Answer TEXT NOT NULL,
-    Assessment INTEGER NOT NULL,
-    UserComment TEXT
-);
-
 -- Создание таблицы категорий
 CREATE TABLE IF NOT EXISTS Category (
     slug VARCHAR(100) NOT NULL UNIQUE,
@@ -62,8 +53,9 @@ ON CONFLICT (slug) DO NOTHING;
 CREATE TABLE IF NOT EXISTS Article (
     Id SERIAL PRIMARY KEY,
     Title VARCHAR(255) NOT NULL,
-    Summary VARCHAR(300) NOT NULL,
+    Summary TEXT,
     Content TEXT NOT NULL,
+    Description TEXT NOT NULL,
     Author VARCHAR(100) NOT NULL,
     Category VARCHAR(100) NOT NULL,
     PublishDate DATE NOT NULL, 
@@ -76,14 +68,9 @@ CREATE TABLE IF NOT EXISTS Article (
 CREATE TABLE IF NOT EXISTS UserArticle (
     "User" VARCHAR(100),
     Article INTEGER,
-    PRIMARY KEY ("User", Article)
+    PRIMARY KEY ("User", Article),
+    FOREIGN KEY ("User") REFERENCES "User"(Email) ON DELETE CASCADE,
+    FOREIGN KEY (Article) REFERENCES Article(id) ON DELETE CASCADE
 );
 
-INSERT INTO UserArticle ("User", Article)
-VALUES 
-    ('admin@gmail.com', 1),
-    ('admin@gmail.com', 2),
-    ('admin@gmail.com', 3),
-    ('admin@gmail.com', 4)
-ON CONFLICT ("User", Article) DO NOTHING; 
 

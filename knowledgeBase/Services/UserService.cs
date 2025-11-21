@@ -15,13 +15,6 @@ public class UserService
         _userRepository = userRepository;
         _sessionRepository = sessionRepository;
     }
-    public async Task<List<Article>> GetFavouriteArticles(string sessionId)
-    {
-        List<Article> articles = new List<Article>();
-        var user = await _sessionRepository.GetUserBySessionId(sessionId);
-        articles = await _userRepository.GetAllFavoriteArticles(user.Email);
-        return articles;
-    }
 
     public async Task<string> RegisterNewUser(User user)
     {

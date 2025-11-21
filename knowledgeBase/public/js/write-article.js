@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Запуск простого редактора...');
 
     const titleInput = document.getElementById('articleTitle');
-    const summary = document.getElementById('articleSummary');
+    const description = document.getElementById('articleDescription');
     const contentDiv = document.getElementById('articleContent');
     const wordCountElement = document.getElementById('wordCount');
     const wordCountElementFoot = document.getElementById('wordCountFoot');
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         publishBtn.addEventListener('click', async function(){
             const title = titleInput.value.trim();
             const content = contentDiv ? contentDiv.innerHTML : '';
-            const summaryValue = summary.value.trim();
+            const descriptionValue = description.value.trim();
             const categoryValue = CategoryElement.value;
 
             if (!title) {
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const articleData = {
                 Title: title,
-                Summary: summaryValue,
+                Description: descriptionValue,
                 Content: content,
                 ReadingTime: readingTime,
                 Category: categoryValue

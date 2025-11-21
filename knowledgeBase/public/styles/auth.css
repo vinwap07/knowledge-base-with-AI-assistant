@@ -1,3 +1,12 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f7fafc;
+    color: #2d3748;
+    line-height: 1.6;
+}
+
 .auth-container {
     min-height: 100vh;
     display: flex;
@@ -49,7 +58,7 @@
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="password"] {
-    width: 100%;
+    width: 90%;
     padding: 12px 16px;
     border: 2px solid #e2e8f0;
     border-radius: 12px;

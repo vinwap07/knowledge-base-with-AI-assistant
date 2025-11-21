@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Загрузка header
-    fetch('header.html')
+    fetch('http://localhost:5000/header.html')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Header not found');
@@ -13,17 +13,4 @@ document.addEventListener('DOMContentLoaded', function() {
             new HeaderAuthChecker();
         })
         .catch(error => console.error('Ошибка загрузки header:', error));
-
-    // Загрузка footer
-    fetch('footer.html')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Footer not found');
-            }
-            return response.text();
-        })
-        .then(data => {
-            document.getElementById('footer').innerHTML = data;
-        })
-        .catch(error => console.error('Ошибка загрузки footer:', error));
 });

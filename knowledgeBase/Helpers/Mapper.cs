@@ -22,12 +22,14 @@ public static class Mapper
             Id = (int)reader["Id"],
             Title = (string)reader["Title"],
             Summary = (string)reader["Summary"],
-            Category = (string)reader["Category"],
+            Description = (string)reader["Description"],
+            Category = (string)reader["CategoryName"],
             Content = (string)reader["Content"],
             Author = (string)reader["Author"],
             PublishDate = (DateOnly)reader["PublishDate"],
             ReadingTime = (int)reader["ReadingTime"], 
             LikesCount = (int)reader["LikesCount"],
+            Icon = (string)reader["Icon"],
         };
     }
 
@@ -38,18 +40,6 @@ public static class Mapper
             SesisonId = (string)reader["sessionid"],
             UserEmail = (string)reader["useremail"],
             EndTime = (DateTime)reader["endtime"],
-        };
-    }
-
-    public static QuestionLog MapToQuestionLog(IDataReader reader)
-    {
-        return new QuestionLog()
-        {
-            Id = (int)reader["Id"],
-            Question = (string)reader["Question"],
-            Answer = (string)reader["Answer"],
-            Assessment = (int)reader["Assessment"],
-            UserComment = (string)reader["UserComment"]
         };
     }
 
@@ -73,4 +63,6 @@ public static class Mapper
             Article = (int)reader["Article"],
         };
     }
+    
+    
 }

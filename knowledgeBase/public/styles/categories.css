@@ -10,7 +10,7 @@ body {
 
 .categories-container {
     max-width: 1200px;
-    margin: 6rem auto 0 auto;
+    margin: 4rem auto 0 auto;
     padding: 2rem;
 }
 
@@ -35,7 +35,7 @@ body {
 
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
     margin-bottom: 3rem;
 }

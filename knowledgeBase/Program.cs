@@ -38,20 +38,26 @@ routeTable.Post("/user/update",
     async (context, parameters) => await userController.UpdateUserProfile(context, parameters));
 routeTable.Delete("user/profile", 
     async (context, parameters) => await userController.DeleteUserProfile(context, parameters));
-routeTable.Post("/article/toFavorite", 
-    async (context, parameters) => await articleController.AddArticleToFavorite(context, parameters));
-routeTable.Delete("/article/toUnFavorite", 
-    async (context, parameters) => await articleController.RemoveArticleFromFavorite(context, parameters));
+
+routeTable.Get("/categories",
+    async (context, parameters) => await categoryController.GetAllCategories(context, parameters));
+routeTable.Get("/categories/slugs",
+    async (context, parameters) => await categoryController.GetAllCategoryDTO(context, parameters));
+
+routeTable.Get("/article",
+    async (context, parameters) => await articleController.GetAllArticleDTO(context, parameters));
 routeTable.Get("/article/favorite", 
     async (context, parameters) => await articleController.GetFavoriteArticlesPreview(context, parameters));
 routeTable.Post("/article/create",
     async (context, parameters) => await articleController.CreateArticle(context, parameters));
 routeTable.Get("/article/myArticles",
     async (context, parameters) => await articleController.GetMyArticlePreview(context, parameters));
-routeTable.Get("/categories",
-    async (context, parameters) => await categoryController.GetAllCategories(context, parameters));
-routeTable.Get("/categories/slugs",
-    async (context, parameters) => await categoryController.GetAllCategoryDTO(context, parameters));
+routeTable.Get("/article/checkLike/{articleId}",
+    async (context, parameters) => await articleController.CheckLike(context, parameters));
+routeTable.Post("/article/like/{articleId}", 
+    async (context, parameters) => await articleController.LikeArticle(context, parameters));
+routeTable.Delete("/article/like/{articleId}", 
+    async (context, parameters) => await articleController.RemoveArticleFromLiked(context, parameters));
 routeTable.Get("/article/{articleId}", 
     async (context, parameters) => await articleController.GetArticlePage(context, parameters));
 routeTable.Get("/article/popular/{count}",
@@ -78,3 +84,4 @@ while (listener.IsListening)
         await middlewarePipeline.ExecuteAsync(myContext);
     });
 }
+

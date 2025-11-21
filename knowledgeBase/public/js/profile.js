@@ -6,7 +6,7 @@ class ProfileManager {
         // Инициализируем с обработкой ошибок
         this.init().catch(error => {
             console.error('Ошибка инициализации ProfileManager:', error);
-            this.showError('Не удалось загрузить профиль');
+            showError('Не удалось загрузить профиль');
         });
     }
 
@@ -14,6 +14,7 @@ class ProfileManager {
         await this.loadUserProfile();
         this.setupEventListeners();
         this.updateUI();
+        this.bindEvents();
     }
 
     async loadUserProfile() {
@@ -21,14 +22,6 @@ class ProfileManager {
             const response = await fetch('http://localhost:5000/user/getProfile', {
                 method: 'GET',
             });
-
-            if (response.status === 401) {
-                this.showNotification('Вы не имеете права доступа', 'error');
-                setTimeout(() => {
-                    window.location.href = '/index.html';
-                }, 2000);
-                return;
-            }
 
             if (!response.ok) {
                 return response.text().then(html => {
@@ -68,7 +61,7 @@ class ProfileManager {
 
         } catch (error) {
             console.error('Ошибка загрузки профиля:', error);
-            this.showError('Не удалось загрузить профиль: ' + error.message);
+            showError('Не удалось загрузить профиль: ' + error.message);
         }
     }
 
@@ -89,7 +82,6 @@ class ProfileManager {
             const userRole = this.currentUser?.role || 'user'
             
             document.getElementById('userName').textContent = userName;
-            document.getElementById('userAvatar').textContent = this.getInitials(userName);
             document.getElementById('profileName').textContent = userName;
             document.getElementById('profileEmail').textContent = userEmail;
             document.getElementById('profileAvatar').textContent = this.getInitials(userName);
@@ -163,7 +155,6 @@ class ProfileManager {
 
         } catch (error) {
             console.error('Ошибка загрузки понравившихся статей:', error);
-            this.showErrorMessage('likedArticles', 'Не удалось загрузить понравившиеся статьи');
         }
     }
 
@@ -189,7 +180,7 @@ class ProfileManager {
 
         } catch (error) {
             console.error('Ошибка загрузки ваших статей:', error);
-            this.showErrorMessage('myArticles', 'Не удалось загрузить ваши статьи');
+            showError('Не удалось загрузить ваши статьи')
         }
     }
 
@@ -206,41 +197,10 @@ class ProfileManager {
                 return;
             }
 
-            container.innerHTML = articles.map(article => `
-            <div class="article-card" data-article-id="${article.id}">
-                <h3 class="article-title">${article.title}</h3>
-                <div class="article-meta">
-                    <span class="author">👤 ${article.author}</span>
-                    <span class="date">📅 ${this.formatDate(article.publishDate)}</span>
-                    <span class="reading-time">⏱️ ${this.calculateReadingTime(article.readingTime)}</span>
-                </div>
-                <p class="article-excerpt">${article.summary}</p>
-                <div class="article-stats">
-                    <span class="likes">❤️ ${article.likesCount}</span>
-                </div>
-                <div class="article-actions">
-                    <button class="btn btn-primary btn-sm" onclick="profileManager.readArticle(${article.id})">
-                        Читать
-                    </button>
-                </div>
-            </div>
-        `).join('');
-
+            container.innerHTML = articles.map(article => createArticleCard(article)).join('');
+            
         } catch (error) {
             console.error('Ошибка отображения статей:', error);
-            this.showErrorMessage(containerId, 'Ошибка при отображении статей');
-        }
-    }
-    formatDate(dateString) {
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        } catch {
-            return dateString;
         }
     }
 
@@ -276,10 +236,10 @@ class ProfileManager {
             this.updateUI();
             this.loadMyArticles();
 
-            this.showNotification(`Роль изменена на: ${this.getRoleDisplayName(role)}`, 'success');
+            showNotification(`Роль изменена на: ${this.getRoleDisplayName(role)}`, 'success');
         } catch (error) {
             console.error('Ошибка переключения роли:', error);
-            this.showError('Ошибка при изменении роли');
+            showError('Ошибка при изменении роли');
         }
     }
 
@@ -328,123 +288,110 @@ class ProfileManager {
 
             // В реальном приложении здесь был бы запрос к API
             console.log('Назначение модератора:', moderatorData);
-            this.showNotification('Пользователь успешно назначен модератором!', 'success');
-            this.hideCreateModeratorModal();
+            showNotification('Пользователь успешно назначен модератором!', 'success');
+            hideCreateModeratorModal();
 
         } catch (error) {
             console.error('Ошибка назначения модератора:', error);
-            this.showNotification('Ошибка при назначении модератора', 'error');
-        }
-    }
-
-    readArticle(articleId) {
-        try {
-            window.location.href = 'http://localhost:5000/article/' + articleId;
-        } catch (error) {
-            console.error('Ошибка чтения статьи:', error);
+            showNotification('Ошибка при назначении модератора', 'error');
         }
     }
 
     editProfile() {
         try {
-            this.showNotification('Редактирование профиля', 'info');
+            showNotification('Редактирование профиля', 'info');
             // window.location.href = '/edit-profile.html';
         } catch (error) {
             console.error('Ошибка редактирования профиля:', error);
         }
     }
 
-    // Утилиты
-    showNotification(message, type = 'info') {
+    async handleLike(likeBtn) {
+        const articleId = likeBtn.dataset.articleId;
+        const currentLikes = parseInt(likeBtn.dataset.likesCount) || 0;
+        const isCurrentlyLiked = likeBtn.dataset.isLiked === 'true';
+
         try {
-            // Создаем уведомление
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
-            notification.innerHTML = `
-                <span>${message}</span>
-                <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
-            `;
+            likeBtn.disabled = true;
+            likeBtn.innerHTML = '💫 ...';
 
-            // Стили для уведомления
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                right: 20px;
-                background: ${type === 'error' ? '#fed7d7' : type === 'success' ? '#c6f6d5' : '#bee3f8'};
-                color: ${type === 'error' ? '#9b2c2c' : type === 'success' ? '#276749' : '#2c5aa0'};
-                padding: 12px 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                z-index: 10001;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                max-width: 400px;
-                border-left: 4px solid ${type === 'error' ? '#e53e3e' : type === 'success' ? '#38a169' : '#3182ce'};
-                animation: slideIn 0.3s ease-out;
-            `;
+            const method = isCurrentlyLiked ? "DELETE" : "POST";
 
-            document.body.appendChild(notification);
+            const response = await fetch(`http://localhost:5000/article/like/${articleId}`, {
+                method: method
+            });
 
-            // Автоматическое скрытие через 5 секунд
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 5000);
+            if (!response.ok) {
+                return response.text().then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                });
+            }
+
+            const result = await response.text();
+            console.log('Ответ от сервера:', result);
+
+            const newIsLiked = !isCurrentlyLiked;
+            
+
+            // Вычисляем новое количество лайков
+            let newLikesCount;
+            if (newIsLiked) {
+                newLikesCount = currentLikes + 1;
+                likeBtn.innerHTML = '💫 ...';
+            } else {
+                newLikesCount = Math.max(0, currentLikes - 1); // Защита от отрицательных значений
+            }
+
+            likeBtn.dataset.likesCount = newLikesCount;
+            likeBtn.dataset.isLiked = newIsLiked;
+            likeBtn.className = newIsLiked ? 'like-btn liked' : 'like-btn';
+            likeBtn.innerHTML = `${newIsLiked ? '💖' : '❤️'} ${newLikesCount}`;
+            this.updateArticles();
+
+            console.log('Новое состояние:', {
+                articleId,
+                currentLikes,
+                newLikesCount,
+                isCurrentlyLiked,
+                newIsLiked
+            });
+
         } catch (error) {
-            console.error('Ошибка показа уведомления:', error);
-        }
-    }
-
-    showError(message) {
-        this.showNotification(message, 'error');
-    }
-
-    calculateReadingTime(minutes){
-        if (minutes === 1) {
-            return '1 минута';
-        } else if (minutes < 5) {
-            return `${minutes} минуты`;
-        } else {
-            return `${minutes} минут`;
-        }
-    }
-}
-
-// Добавляем стили для анимации уведомлений
-const notificationStyles = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+            console.error('Ошибка при лайке:', error);
+        } finally {
+            likeBtn.disabled = false;
         }
     }
     
-    .notification-close {
-        background: none;
-        border: none;
-        font-size: 18px;
-        cursor: pointer;
-        padding: 0;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-`;
+    async updateArticles(){
+        try {
+            // Очищаем контейнеры
+            const myArticlesContainer = document.getElementById('myArticles');
+            const likedArticlesContainer = document.getElementById('likedArticles');
 
-// Добавляем стили только если их еще нет
-if (!document.querySelector('style[data-profile-notifications]')) {
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = notificationStyles;
-    styleSheet.setAttribute('data-profile-notifications', 'true');
-    document.head.appendChild(styleSheet);
+            if (myArticlesContainer) myArticlesContainer.innerHTML = '<div class="loading-message">Загрузка...</div>';
+            if (likedArticlesContainer) likedArticlesContainer.innerHTML = '<div class="loading-message">Загрузка...</div>';
+
+            this.loadLikedArticles();
+            this.loadMyArticles();
+        } catch (error) {
+            console.error('Ошибка перезагрузки:', error);
+            // Показываем ошибку в контейнерах
+            const errorHTML = '<div class="error">Ошибка загрузки</div>';
+            document.getElementById('myArticles').innerHTML = errorHTML;
+            document.getElementById('likedArticles').innerHTML = errorHTML;
+        }
+    }
+
+    bindEvents() {
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.like-btn')) {
+                this.handleLike(e.target.closest('.like-btn'));
+            }
+        });
+    }
 }
 
 // Инициализация

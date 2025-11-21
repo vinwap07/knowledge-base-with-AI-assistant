@@ -10,16 +10,7 @@ public static class DTOMaker
         var articlePreviews = new List<ArticlePreviewDTO>();
         foreach (var article in articles)
         {
-            articlePreviews.Add(new ArticlePreviewDTO()
-            {
-                Id = article.Id,
-                Author = article.Author,
-                Title = article.Title,
-                Summary = article.Summary,
-                PublishDate = article.PublishDate,
-                ReadingTime = article.ReadingTime,
-                LikesCount = article.LikesCount
-            });
+            articlePreviews.Add(MapArticle(article));
         }
         return articlePreviews;
     }
@@ -31,10 +22,13 @@ public static class DTOMaker
             Id = article.Id,
             Author = article.Author,
             Title = article.Title,
-            Summary = article.Summary,
+            Description = article.Description,
             PublishDate = article.PublishDate,
             ReadingTime = article.ReadingTime,
-            LikesCount = article.LikesCount
+            LikesCount = article.LikesCount, 
+            Category = article.Category, 
+            IsLikedByUser = article.IsLikedByUser,
+            Icon = article.Icon
         };
     }
 

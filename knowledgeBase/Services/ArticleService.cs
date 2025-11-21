@@ -1,3 +1,4 @@
+using System.Text.Json;
 using knowledgeBase.Entities;
 using knowledgeBase.Repositories;
 using knowledgeBase.View_Models;
@@ -16,10 +17,12 @@ public class ArticleService
         _sessionRepository = sessionRepository;
         _userRepository = userRepository;
     }
-    public async Task<int> CreateArticle(Article article, User user, string role)
+    public async Task<int> CreateArticle(string sessionId, Article article, string role)
     {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
         article.PublishDate = DateOnly.FromDateTime(DateTime.Now);
         article.Author = user.Email;
+        article.Summary = await CreateSummary(article.Content);
         if (role == "user")
         {
             throw new UnauthorizedAccessException();
@@ -45,12 +48,14 @@ public class ArticleService
         return articleId;
     }
 
-    public async Task<Article> GetArticleById(int articleId)
+    public async Task<Article> GetArticleById(int articleId, string sessionId)
     {
-        return await _articleRepository.GetById(articleId);
+        var article = await _articleRepository.GetById(articleId);
+        article.IsLikedByUser = await CheckLike(article.Id, sessionId);
+        return article;
     }
 
-    public async Task<List<Article>> SearchArticlesByCategory(string? category)
+    public async Task<List<Article>> SearchArticlesByCategory(string? category, string sessionId)
     {
         var articles = new List<Article>();
         if (category != null)
@@ -62,6 +67,10 @@ public class ArticleService
             articles = await _articleRepository.GetAll();
         }
         
+        foreach (var article in articles)
+        {
+            article.IsLikedByUser = await CheckLike(article.Id, sessionId);
+        }
         return articles;
     }
 
@@ -82,25 +91,71 @@ public class ArticleService
         return await _articleRepository.GetArticleLikesCountById(articleId);
     }
 
-    public async Task<List<Article>> GetArticlesByAuthor(string authorEmail)
+    public async Task<List<Article>> GetArticlesByAuthor(string authorEmail, string sessionId)
     {
-        return await _articleRepository.GetArticleByAuthor(authorEmail);
+        var articles = await _articleRepository.GetArticleByAuthor(authorEmail);
+        foreach (var article in articles)
+        {
+            article.IsLikedByUser = await CheckLike(article.Id, sessionId);
+        }
+        return articles;
     }
 
-    public async Task<List<Article>> GetPopularArticles(int count)
+    public async Task<List<Article>> GetPopularArticles(int count, string sessionId)
     {
-        return await _articleRepository.GetArticlesByLikeCount(count);
+        var articles = await _articleRepository.GetArticlesByLikeCount(count);
+        foreach (var article in articles)
+        {
+            article.IsLikedByUser = await CheckLike(article.Id, sessionId);
+        }
+        return articles;
     }
     
-    public async Task<bool> AddArticleToFavorite(string sessionId, int articleId)
+    public async Task<bool> LikeArticle(string sessionId, int articleId)
     {
         var user = await _sessionRepository.GetUserBySessionId(sessionId);
-        return await _articleRepository.AddArticleToFavorite(user.Email, articleId);
+        return await _articleRepository.LikeArticle(user.Email, articleId);
     }
 
-    public async Task<bool> RemoveArticleFromFavorite(string sessionId, int articleId)
+    public async Task<bool> RemoveArticleFromLiked(string sessionId, int articleId)
     {
         var user = await _sessionRepository.GetUserBySessionId(sessionId);
         return await _articleRepository.RemoveArticleFromFavorite(user.Email, articleId);
+    }
+
+    public async Task<List<Article>> GetAllArticles(string sessionId)
+    {
+        var articles = await _articleRepository.GetAll();
+        foreach (var article in articles)
+        {
+            article.IsLikedByUser = await CheckLike(article.Id, sessionId);
+        }
+        return articles;
+    }
+
+    public async Task<bool> CheckLike(int articleId, string sessionId)
+    {
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        var isLiked = await _articleRepository.CheckLikeFromUser(user.Email, articleId);
+        return isLiked;
+    }
+    
+    public async Task<List<Article>> GetFavouriteArticles(string sessionId)
+    {
+        List<Article> articles = new List<Article>();
+        var user = await _sessionRepository.GetUserBySessionId(sessionId);
+        articles = await _articleRepository.GetAllFavoriteArticles(user.Email);
+        foreach (var article in articles)
+        {
+            article.IsLikedByUser = await CheckLike(article.Id, sessionId);
+        }
+        return articles;
+    }
+
+    private async Task<string> CreateSummary(string articleContent)
+    {
+        var answer = await OllamaService.SendRequest(articleContent);
+        var ollamaResponse = JsonSerializer.Deserialize<OllamaResponse>(answer);
+        return ollamaResponse.Response;
     }
 }
